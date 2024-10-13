@@ -29,7 +29,7 @@ local function getCon()
     else
       conGot = internet.connect(conf.address)
     end
-    os.sleep()
+    os.sleep(1)
     conGot.finishConnect()
     res = conGot.finishConnect()
     attempt = attempt + 1
@@ -40,6 +40,7 @@ local function getCon()
   end
   conGot.write(serial.serialize({
     os.date(),
+    id=sg.address,
     {
       "init",
       name = conf.name,
@@ -98,12 +99,13 @@ local function receiveCommand()
 end
 
 local function execute(command)
+  if command[1] == nil then return end
   print("Executing command: " .. command[1])
   if command[1] == "update" then
     os.execute(
-      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/client.lua /home/client.lua -f")
+      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/client.lua?v=1 /home/client.lua -f")
     os.execute(
-      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/.shrc /home/.shrc -f")
+      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/.shrc?v=1 /home/.shrc -f")
     os.execute("reboot")
   elseif command[1] == "status" then
     con.write(serial.serialize { os.date(), id = sg.address,
