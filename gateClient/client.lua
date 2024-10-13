@@ -8,7 +8,7 @@ end
 local internet = component.internet
 local sg = component.stargate
 if component.isAvailable "modem" then
-  for port = 1, 65535 do
+  for port = 1, 16 do
     component.modem.open(port)
   end
 end
@@ -22,6 +22,7 @@ local function getCon()
   local conGot;
   local res
   while not res do
+    print("Attempting socket connefction")
     if conf.port ~= nil then
       conGot = internet.connect(conf.address, conf.port)
     else
@@ -69,6 +70,13 @@ local function processEvent(e)
       type = "modem",
       data = e
     }
+  else
+    return {
+      os.date(),
+      id = sg.address,
+      type = "other",
+      data = e
+    }
   end
 end
 
@@ -84,6 +92,7 @@ local function receiveCommand()
 end
 
 local function execute(command)
+  print("Executing command: " .. command[1])
   if command[1] == "update" then
     os.execute(
       "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/client.lua /home/client.lua")
@@ -103,6 +112,9 @@ local function execute(command)
     sendEvent({ os.date(), id = sg.address, type = "bye bye" })
     con.close()
     os.exit()
+  else
+    print("Unknown command: " .. command[1])
+    sendEvent { os.date(), id = sg.address, data = { "error", "Unknown command" } }
   end
 end
 
