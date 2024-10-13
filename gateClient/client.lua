@@ -7,7 +7,7 @@ if not component.isAvailable("internet") then
 end
 local internet = component.internet
 local sg = component.stargate
-local conf = require "config.lua"
+local conf = require "config"
 
 local eventQueue = {}
 local con
@@ -34,7 +34,7 @@ local function getCon()
 end
 
 local function sendEvent(e)
-  eventQueue.insert(e)
+  table.insert(eventQueue, e)
   if con.write(serial.serialize(eventQueue)) > 0 then
     eventQueue = {}
   end
@@ -46,14 +46,14 @@ local function processEvent(e)
       os.date(),
       id = sg.address,
       type = "stargate",
-      e
+      data = e
     }
   elseif e[1] == "modem_message" then
     return {
       os.date,
       id = sg.address,
       type = "modem",
-      e
+      data = e
     }
   end
 end
@@ -61,7 +61,9 @@ end
 local function receiveCommand()
   local data = con.read()
   local command = {}
-  if data ~= "" then
+  if data == nil then
+    return nil
+  elseif data ~= "" then
     command = serial.unserialize(data)
   end
   return command
@@ -76,13 +78,17 @@ local function execute(command)
     os.execute("reboot")
   elseif command[1] == "status" then
     con.write(serial.serialize { os.date(), id = sg.address,
-      {
+      data = {
         "status",
-        status = sg.gateStatus(),
+        status = sg.getGateStatus(),
         dialed = sg.dialedAddress,
         hasDHD = component.isAvailable "dhd"
       }
     })
+  elseif command[1] == "stop" then
+    sendEvent({os.date(), id = sg.address, type="bye bye"})
+    con.close()
+    os.exit()
   end
 end
 
