@@ -1,7 +1,7 @@
 local event = require "event"
 local serial = require "serialization"
 local component = require "component"
-if ~component.isAvailable("internet") then
+if not component.isAvailable("internet") then
   print("This program requires an internet card to run.")
   os.exit()
 end
@@ -25,7 +25,7 @@ local function getCon()
     {
       "init",
       name = conf.name,
-      status = sg.gateStatus(),
+      status = sg.getGateStatus(),
       dialed = sg.dialedAddress,
       hasDHD = component.isAvailable "dhd"
     }
