@@ -20,10 +20,16 @@ local con
 
 local function getCon()
   local conGot;
-  if conf.port ~= nil then
-    conGot = internet.connect(conf.address, conf.port)
-  else
-    conGot = internet.connect(conf.address)
+  local res
+  while not res do
+    if conf.port ~= nil then
+      conGot = internet.connect(conf.address, conf.port)
+    else
+      conGot = internet.connect(conf.address)
+    end
+    os.sleep()
+    conGot.finishConnect()
+    res = conGot.finishConnect()
   end
   conGot.write(serial.serialize({
     os.date(),
@@ -58,7 +64,7 @@ local function processEvent(e)
     }
   elseif e[1] == "modem_message" then
     return {
-      os.date,
+      os.date(),
       id = sg.address,
       type = "modem",
       data = e
