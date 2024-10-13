@@ -7,6 +7,11 @@ if not component.isAvailable("internet") then
 end
 local internet = component.internet
 local sg = component.stargate
+if component.isAvailable "modem" then
+  for port = 1, 65535 do
+    component.modem.open(port)
+  end
+end
 local conf = require "config"
 
 local eventQueue = {}
@@ -35,7 +40,10 @@ end
 
 local function sendEvent(e)
   table.insert(eventQueue, e)
-  if con.write(serial.serialize(eventQueue)) > 0 then
+  local res = con.write(serial.serialize(eventQueue))
+  if res == nil then
+    return
+  elseif res > 0 then
     eventQueue = {}
   end
 end
@@ -86,7 +94,7 @@ local function execute(command)
       }
     })
   elseif command[1] == "stop" then
-    sendEvent({os.date(), id = sg.address, type="bye bye"})
+    sendEvent({ os.date(), id = sg.address, type = "bye bye" })
     con.close()
     os.exit()
   end
