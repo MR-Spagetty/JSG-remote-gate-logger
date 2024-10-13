@@ -21,8 +21,9 @@ local con
 local function getCon()
   local conGot;
   local res
+  local attempt = 0
   while not res do
-    print("Attempting socket connefction")
+    print("Attempting socket connection " .. attempt)
     if conf.port ~= nil then
       conGot = internet.connect(conf.address, conf.port)
     else
@@ -31,6 +32,11 @@ local function getCon()
     os.sleep()
     conGot.finishConnect()
     res = conGot.finishConnect()
+    attempt = attempt + 1
+    if attempt > 5 then
+      print("Failed to connect to the server after 5 attempts.")
+      os.exit()
+    end
   end
   conGot.write(serial.serialize({
     os.date(),
@@ -95,9 +101,9 @@ local function execute(command)
   print("Executing command: " .. command[1])
   if command[1] == "update" then
     os.execute(
-      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/client.lua /home/client.lua")
+      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/client.lua /home/client.lua -f")
     os.execute(
-      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/.shrc /home/.shrc")
+      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/.shrc /home/.shrc -f")
     os.execute("reboot")
   elseif command[1] == "status" then
     con.write(serial.serialize { os.date(), id = sg.address,
