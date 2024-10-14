@@ -20,20 +20,16 @@ public class GateCon extends Connection {
 
   @Override
   protected void startUp() {
-    try {
-      StringBuilder message = new StringBuilder();
-      while (this.incoming.ready()) {
-        message.append(this.incoming.readLine() + "\n");
-      }
-      this.gate = Gate.of(LuaTable.fromString(message.toString().trim()));
-      System.out.println("Gate: "+this.gate.id+ " Connected with name: "+this.gate.name());
-    } catch (IOException e) {
-    }
+    this.gate = Gate.of(LuaTable.fromString(readAll()));
+    System.out.println(
+        "Gate: %s Connected with name: %s".formatted(this.gate.id, this.gate.name()));
   }
 
   @Override
   protected void shutDown() {
     try {
+      System.out.println(
+          "Closing socket for gate: %s with name: %s".formatted(this.gate.id, this.gate.name()));
       this.socket.close();
     } catch (IOException e) {
       System.out.println("unable to close socket");
