@@ -20,7 +20,7 @@ public class GateCon extends Connection {
 
   @Override
   protected void startUp() {
-    this.gate = Gate.of(LuaTable.fromString(readAll()));
+    this.gate = Gate.of(LuaTable.fromString(readPacket()));
     System.out.println(
         "Gate: %s Connected with name: %s".formatted(this.gate.id, this.gate.name()));
   }
