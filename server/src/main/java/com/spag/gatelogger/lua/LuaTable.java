@@ -4,19 +4,20 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class LuaTable implements LuaObject {
-  static final String braceRegex = "\\{((?:[^{}]*\\{[^{}]*\\})*[^{}]*?)\\}";
-  static final Pattern bracePat = Pattern.compile(braceRegex);
+  public static final String braceRegex = "\\{((?:[^{}]*\\{[^{}]*\\})*[^{}]*?)\\}";
+  public static final Pattern bracePat = Pattern.compile(braceRegex);
   static final String numRegex = "[1-9][0-9]*\\.[0-9]+" + "|0\\.[0-9]+" + "|0|[1-9][0-9]*";
-  static final Pattern numPat = Pattern.compile(numRegex);
+  public static final Pattern numPat = Pattern.compile(numRegex);
   static final String stringRegex = "\\\".*?[^\\\\]\\\"";
-  static final Pattern stringPat = Pattern.compile(stringRegex);
-  static final Pattern indexed =
+  public static final Pattern stringPat = Pattern.compile(stringRegex);
+  public static final Pattern indexed =
       Pattern.compile(
           "\\G("
               + braceRegex
@@ -27,7 +28,7 @@ public class LuaTable implements LuaObject {
               + "|"
               + LuaObject.nil.toString()
               + "|true|false),?");
-  static final Pattern keyed =
+  public static final Pattern keyed =
       Pattern.compile(
           "\\G(?:(\\w+)|\\[\\\"(.+)\\\"])=("
               + braceRegex
@@ -121,7 +122,6 @@ public class LuaTable implements LuaObject {
     }
     LuaTable out = new LuaTable();
     data = match.group(1);
-    System.out.println(data);
     int end = 0;
     Matcher indexedValues = indexed.matcher(data);
     while (indexedValues.find()) {
@@ -139,7 +139,7 @@ public class LuaTable implements LuaObject {
   }
 
   private static LuaObject parseObject(String data) {
-    if (data == null) return LuaString.of("what the hell");
+    Objects.requireNonNull(data, "Lua data may not be null");
     if (data.startsWith("{")) {
       return fromString(data);
     } else if (stringPat.matcher(data).matches()) {
