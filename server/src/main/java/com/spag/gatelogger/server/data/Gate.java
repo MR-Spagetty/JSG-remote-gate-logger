@@ -1,20 +1,19 @@
 package com.spag.gatelogger.server.data;
 
+import com.spag.gatelogger.lua.LuaBool;
+import com.spag.gatelogger.lua.LuaString;
+import com.spag.gatelogger.lua.LuaTable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.spag.gatelogger.lua.LuaBool;
-import com.spag.gatelogger.lua.LuaString;
-import com.spag.gatelogger.lua.LuaTable;
 
 public class Gate {
   private static final Map<String, Gate> cache = new HashMap<>();
   public final String id;
   private String name;
   List<LuaTable> gateData = new ArrayList<>();
-  List<LuaTable> modemDatas = new ArrayList<>();
+  List<LuaTable> modemData = new ArrayList<>();
   List<LuaTable> otherData = new ArrayList<>();
 
   Map<GateType, Glyph[]> gateAddresses = new HashMap<>();
@@ -28,6 +27,14 @@ public class Gate {
   private Gate(String id, String name) {
     this(id);
     this.name = name;
+  }
+
+  public String name() {
+    return this.name;
+  }
+
+  public void name(String newName) {
+    this.name = newName;
   }
 
   /*example init packet:
