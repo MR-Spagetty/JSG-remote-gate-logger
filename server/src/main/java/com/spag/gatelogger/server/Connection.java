@@ -20,7 +20,7 @@ public abstract class Connection extends Thread {
       throw new IllegalStateException("Socket is not connected");
     }
   }
-  protected String readAll(){
+  protected String readPacket(){
     String output = "";
     while (!LuaTable.bracePat.matcher(output.trim()).matches()){
       output += this.incoming.nextLine() + "\n";
