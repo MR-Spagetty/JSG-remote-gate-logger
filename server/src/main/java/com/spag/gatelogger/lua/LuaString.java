@@ -1,10 +1,13 @@
 package com.spag.gatelogger.lua;
 
+import static com.spag.gatelogger.lua.SoftFlyweightUtil.clearUnusedRef;
+
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LuaString implements LuaObject {
-  private static Map<String, LuaString> cache = new HashMap<String, LuaString>();
+  private static Map<String, SoftReference<LuaString>> cache = new HashMap<>();
 
   private LuaString(String value) {
     this.value = value;
@@ -22,7 +25,8 @@ public class LuaString implements LuaObject {
   public final String value;
 
   public static LuaString of(String value) {
-    return cache.computeIfAbsent(value, val -> new LuaString(val));
+    clearUnusedRef(cache);
+    return cache.computeIfAbsent(value, val -> new SoftReference<>(new LuaString(val))).get();
   }
 
   @Override
