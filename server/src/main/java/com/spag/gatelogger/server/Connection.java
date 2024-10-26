@@ -31,6 +31,11 @@ public abstract class Connection extends Thread {
   protected final Scanner incoming;
   protected final PrintWriter outgoing;
 
+  public final void sendPacket(LuaTable packetData){
+    this.outgoing.print(packetData.toString());
+    this.outgoing.flush();
+  }
+
   protected abstract void startUp();
 
   protected abstract void shutDown();

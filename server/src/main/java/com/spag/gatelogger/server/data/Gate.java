@@ -1,12 +1,11 @@
 package com.spag.gatelogger.server.data;
 
-import com.spag.gatelogger.lua.LuaBool;
-import com.spag.gatelogger.lua.LuaString;
-import com.spag.gatelogger.lua.LuaTable;
+import com.spag.gatelogger.lua.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Gate {
   private static final Map<String, Gate> cache = new HashMap<>();
@@ -33,12 +32,26 @@ public class Gate {
     return this.name;
   }
 
+  public void logData(LuaTable data) {
+    String type =
+        Optional.ofNullable(data.get("type"))
+            .map(t -> (LuaString) t)
+            .map(t -> t.value)
+            .orElseThrow(() -> new DataFormatException("no packet type given"));
+    switch (type) {
+      case "stargate" -> this.gateData.add(data);
+      case "modem" -> this.modemData.add(data);
+      case "other" -> this.otherData.add(data);
+      default -> throw new DataFormatException("Unknown Gate packet type: \"%s\"".formatted(type));
+    }
+  }
+
   public void name(String newName) {
     this.name = newName;
   }
 
   /*example init packet:
-  {"03/02/70 04:28:08",id="1eb0a1e1-9a12-41e9-a297-76bd6485d70d",data={"init",hasDHD=false,dialed="[]",status="idle",name="Chulak"}} */
+  {"03/02/70 04:28:08",id="1eb0a1e1-9a12-41e9-a297-76bd6485d70d",type="init",data={"init",hasDHD=false,dialed="[]",status="idle",name="Chulak"}} */
   public static Gate of(LuaTable init) {
     Gate gate =
         cache.computeIfAbsent(

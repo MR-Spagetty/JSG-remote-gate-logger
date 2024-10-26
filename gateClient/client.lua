@@ -41,7 +41,8 @@ local function getCon()
   conGot.write(serial.serialize({
     os.date(),
     id=sg.address,
-    {
+    type = "init",
+    data = {
       "init",
       name = conf.name,
       status = sg.getGateStatus(),
