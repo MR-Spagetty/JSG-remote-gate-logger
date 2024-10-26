@@ -6,8 +6,8 @@ import java.net.Socket;
 
 /** Hello world! */
 public class App {
-  static int clientPort;
-  static int gatePort;
+  static int clientPort = 3002;
+  static int gatePort = 3001;
 
   public static void main(String[] args) {
     Thread clientCons = new Thread(App::listenForClient);

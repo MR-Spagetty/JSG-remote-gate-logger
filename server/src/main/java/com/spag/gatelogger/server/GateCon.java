@@ -36,4 +36,9 @@ public class GateCon extends Connection {
     }
     gateConns = gateConns.stream().filter(c -> c != this).toList();
   }
+
+  @Override
+  protected void doPacket(LuaTable packet) {
+    
+  }
 }
