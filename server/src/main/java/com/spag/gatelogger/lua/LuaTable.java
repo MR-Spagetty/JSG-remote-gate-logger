@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class LuaTable implements LuaObject {
   public static final String braceRegex = "\\{((?:[^{}]*\\{[^{}]*\\})*[^{}]*?)\\}";
@@ -61,6 +62,14 @@ public class LuaTable implements LuaObject {
     IntStream.range(1, dataByIndex.size())
         .forEach(i -> iterator.accept("" + i, this.dataByIndex.get(i)));
     dataByKey.entrySet().forEach(e -> iterator.accept(e.getKey(), e.getValue()));
+  }
+
+  public Stream<LuaObject> stream(){
+    return this.dataByIndex.stream();
+  }
+
+  public Stream<LuaObject> parallelStream(){
+    return this.dataByIndex.parallelStream();
   }
 
   public LuaObject get(String key) {
@@ -152,5 +161,12 @@ public class LuaTable implements LuaObject {
       return LuaObject.nil;
     }
     throw new IllegalArgumentException("Unrecognised type detected: " + data);
+  }
+
+  public LuaTable merge(LuaTable b) {
+    LuaTable out = new LuaTable();
+    Stream.concat(stream(), b.stream()).forEach(out::add);
+    Stream.concat(this.dataByKey.entrySet().stream(), b.dataByKey.entrySet().stream()).forEach(e -> out.put(e.getKey(), e.getValue()));
+    return out;
   }
 }
