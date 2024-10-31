@@ -48,9 +48,25 @@ public class GateCon extends Connection {
     switch (type) {
       case "init" -> this.gate = Gate.of(packet);
       case "stargate", "modem", "other" -> this.gate.logData(packet);
-      case "response" -> {}
+      case "response" -> {
+        if (packet.get("data") == LuaObject.nil) {
+          return;
+        }
+        this.subs.parallelStream().filter(s -> s.classifier().test(packet)).toList().stream()
+            .forEach(
+                sr -> {
+                  sr.handler().accept(packet);
+                  this.subs = this.subs.parallelStream().filter(s -> s != sr).toList();
+                });
+      }
       default -> {}
     }
+  }
+
+  private List<GateSubscriber> subs = List.of();
+
+  public void subscribe(GateSubscriber sub) {
+    this.subs = Stream.concat(this.subs.stream(), Stream.of(sub)).toList();
   }
 
   public static void sendPacket(String id, LuaTable packetData) {

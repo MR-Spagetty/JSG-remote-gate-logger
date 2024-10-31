@@ -164,9 +164,19 @@ public class LuaTable implements LuaObject {
   }
 
   public LuaTable merge(LuaTable b) {
+    Stream.concat(stream(), b.stream()).forEach(this::add);
+    Stream.concat(this.dataByKey.entrySet().parallelStream().filter(e -> !b.dataByKey.containsKey(e.getKey())), b.dataByKey.entrySet().parallelStream()).forEach(e -> put(e.getKey(), e.getValue()));
+    return this;
+  }
+
+  public static LuaTable merge(LuaTable a, LuaTable b){
     LuaTable out = new LuaTable();
-    Stream.concat(stream(), b.stream()).forEach(out::add);
-    Stream.concat(this.dataByKey.entrySet().stream(), b.dataByKey.entrySet().stream()).forEach(e -> out.put(e.getKey(), e.getValue()));
+    out.merge(a);
+    out.merge(b);
     return out;
+  }
+
+  public LuaObject replace(int i, LuaObject newElm) {
+    return this.dataByIndex.set(i-1, newElm);
   }
 }

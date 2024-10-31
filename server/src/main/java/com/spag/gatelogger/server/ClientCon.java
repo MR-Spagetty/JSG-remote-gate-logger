@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ClientCon extends Connection {
 
@@ -18,7 +20,8 @@ public class ClientCon extends Connection {
     LuaTable connPacket = LuaTable.fromString(readPacket());
     LuaTable welcome = new LuaTable();
     welcome.put("type", LuaString.of("welcome"));
-
+    LuaTable welcomeData = new LuaTable();
+    welcomeData.add(LuaString.of("Hello %s"));
   }
 
   @Override
@@ -61,14 +64,6 @@ public class ClientCon extends Connection {
     responsePacket.put(
         "data",
         switch (command.get(0)) {
-          case "update" -> {
-            LuaTable t = new LuaTable();
-            yield t;
-          }
-          case "close" -> {
-            LuaTable t = new LuaTable();
-            yield t;
-          }
           case "list" ->
               GateCon.gateConns.stream()
                   .map(c -> c.gate)
@@ -78,10 +73,94 @@ public class ClientCon extends Connection {
                         t.put(g.id, LuaString.of(g.name()));
                         return t;
                       },
-                      LuaTable::merge);
-          default -> null;
+                      (a, b) -> a.merge(b));
+          default ->
+              gateRequest(command.get(0), (String[]) command.subList(1, command.size()).toArray());
         });
     responsePacket.add(LuaString.of("" + System.currentTimeMillis() / 1000));
     sendPacket(responsePacket);
+  }
+
+  private static final UnsupportedOperationException COMMAND_ROOT_ERROR =
+      new UnsupportedOperationException("invalid command");
+
+  private LuaTable invalidCommand(String reason, String... extra) {
+    LuaTable out = new LuaTable();
+    out.add(LuaString.of("invalid command"));
+    out.put("reason", LuaString.of(reason));
+    if (extra.length > 0) {
+      LuaTable extraData = new LuaTable();
+      Stream.of(extra).forEach(d -> extraData.add(LuaString.of(d)));
+      out.put("info", extraData);
+    }
+    return out;
+  }
+
+  private LuaTable gateRequest(String command, String... params) {
+    try {
+      LuaTable out = new LuaTable();
+      if (params.length < 1) {
+        throw new UnsupportedOperationException("No gate specified", COMMAND_ROOT_ERROR);
+      }
+      GateCon selected =
+          GateCon.gateConns.stream()
+              .filter(g -> g.gate.id.substring(0, params[0].length()).equals(params[0]))
+              .reduce(
+                  (a, b) -> {
+                    throw new UnsupportedOperationException(
+                        """
+                        Shortened id \"%s\" is ambiguous between at least:
+                          \"%s\" (%s)
+                          \"%s\" (%s)"""
+                            .formatted(
+                                params[0], a.gate.id, a.gate.name(), b.gate.id, b.gate.name()),
+                        COMMAND_ROOT_ERROR);
+                  })
+              .orElseThrow(
+                  () ->
+                      new UnsupportedOperationException(
+                          "No gate found with id matching \"%s\"".formatted(params[0]),
+                          COMMAND_ROOT_ERROR));
+
+      int nParams = params.length - 1;
+      assert nParams >= 0;
+      switch (command) {
+        case "update" -> {
+          LuaTable packet = new LuaTable();
+          packet.add(LuaString.of("update"));
+          selected.sendPacket(packet);
+        }
+        case "info" -> {
+          if (nParams == 0) {
+            selected.subscribe(
+                new GateSubscriber(
+                    "status",
+                    d -> {
+                      out.merge((LuaTable) d.get("data"));
+                      this.notify();
+                    }));
+          } else {
+            return invalidCommand(
+                "Unknown request \"info %s\""
+                    .formatted(Stream.of(params).collect(Collectors.joining(" "))));
+          }
+          this.wait();
+          out.replace(0, LuaString.of(""));
+        }
+        case "close" -> {}
+        default -> invalidCommand("Unknown request \"%s\"".formatted(command));
+      }
+
+      return out;
+    } catch (UnsupportedOperationException e) {
+      if (e.getCause() == COMMAND_ROOT_ERROR) {
+        return invalidCommand(e.getMessage());
+      }
+      throw e;
+    } catch (InterruptedException e) {
+      LuaTable out = new LuaTable();
+      out.add(LuaString.of("response await interrupted"));
+      return out;
+    }
   }
 }
