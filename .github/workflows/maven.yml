@@ -28,7 +28,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Install lua lib
-      run: mvn -f lua clean isntall 
+      run: mvn -f lua clean install 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
