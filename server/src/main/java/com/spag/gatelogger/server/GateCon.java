@@ -1,7 +1,8 @@
 package com.spag.gatelogger.server;
 
-import com.spag.gatelogger.lua.*;
 import com.spag.gatelogger.server.data.Gate;
+import com.spag.lua.*;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;

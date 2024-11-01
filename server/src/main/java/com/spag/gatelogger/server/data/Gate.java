@@ -1,11 +1,12 @@
 package com.spag.gatelogger.server.data;
 
-import com.spag.gatelogger.lua.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import com.spag.lua.*;
 
 public class Gate {
   private static final Map<String, Gate> cache = new HashMap<>();

@@ -1,8 +1,14 @@
-package com.spag.gatelogger.lua;
+package com.spag.lua;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+
+import com.spag.lua.LuaBool;
+import com.spag.lua.LuaNum;
+import com.spag.lua.LuaObject;
+import com.spag.lua.LuaString;
+import com.spag.lua.LuaTable;
 
 public class TableTests {
   @Test

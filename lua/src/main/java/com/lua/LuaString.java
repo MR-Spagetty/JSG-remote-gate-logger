@@ -1,6 +1,6 @@
-package com.spag.gatelogger.lua;
+package com.spag.lua;
 
-import static com.spag.gatelogger.lua.SoftFlyweightUtil.clearUnusedRef;
+import static com.spag.lua.SoftFlyweightUtil.clearUnusedRef;
 
 import java.lang.ref.SoftReference;
 import java.util.HashMap;

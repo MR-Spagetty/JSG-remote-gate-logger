@@ -1,4 +1,4 @@
-package com.spag.gatelogger.lua;
+package com.spag.lua;
 
 public interface LuaObject {
   public static final LuaObject nil = new LuaObject() {

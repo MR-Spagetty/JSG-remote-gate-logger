@@ -1,8 +1,9 @@
 package com.spag.gatelogger.server;
 
-import com.spag.gatelogger.lua.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import com.spag.lua.*;
 
 public record GateSubscriber(Predicate<LuaTable> classifier, Consumer<LuaTable> handler) {
 

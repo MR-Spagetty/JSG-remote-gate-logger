@@ -1,4 +1,4 @@
-package com.spag.gatelogger.lua;
+package com.spag.lua;
 
 public enum LuaBool implements LuaObject {
   True,

@@ -1,4 +1,4 @@
-package com.spag.gatelogger.lua;
+package com.spag.lua;
 
 import java.lang.ref.SoftReference;
 import java.util.Map;

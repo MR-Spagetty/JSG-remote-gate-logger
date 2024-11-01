@@ -1,10 +1,11 @@
 package com.spag.gatelogger.server;
 
-import com.spag.gatelogger.lua.LuaTable;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+
+import com.spag.lua.LuaTable;
 
 public abstract class Connection extends Thread {
   protected final Socket socket;
