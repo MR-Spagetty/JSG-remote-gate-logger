@@ -27,6 +27,8 @@ jobs:
         java-version: '22'
         distribution: 'temurin'
         cache: maven
+    - name: Test lua lib
+      run: mvn -f lua clean test
     - name: Install lua lib
       run: mvn -f lua clean install 
     - name: Build Server with Maven
