@@ -1,11 +1,11 @@
 package com.spag.gatelogger.server;
 
+import com.spag.lua.LuaTable;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
-
-import com.spag.lua.LuaTable;
 
 public abstract class Connection extends Thread {
   protected final Socket socket;
@@ -32,7 +32,7 @@ public abstract class Connection extends Thread {
   protected final Scanner incoming;
   protected final PrintWriter outgoing;
 
-  public final void sendPacket(LuaTable packetData){
+  public final void sendPacket(LuaTable packetData) {
     this.outgoing.print(packetData.toString());
     this.outgoing.flush();
   }
@@ -54,7 +54,10 @@ public abstract class Connection extends Thread {
     }
     startUp();
     while (socket.isConnected()) {
-      doPacket(readPacket());
+      try {
+        doPacket(readPacket());
+      } catch (NoSuchElementException e) {
+      }
     }
 
     shutDown();
