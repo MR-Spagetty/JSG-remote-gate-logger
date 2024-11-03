@@ -12,25 +12,30 @@ public class GUI extends JFrame {
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     setSize(400, 500);
     setContentPane(new Box(BoxLayout.X_AXIS));
-    JList<Gate> knownGatesList = new JList<>(this.knownGates);
-    knownGatesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    knownGatesList.setAlignmentY(TOP_ALIGNMENT);
-    {
-      JPanel gateList = new JPanel(new BorderLayout());
-      JLabel gatesLabel = new JLabel("Gates", JLabel.CENTER);
-      gatesLabel.setFont(
-          new Font(gatesLabel.getFont().getName(), gatesLabel.getFont().getStyle(), 20));
-      gateList.add(gatesLabel, BorderLayout.NORTH);
-      gateList.getComponent(0);
-      gateList.add(knownGatesList, BorderLayout.CENTER);
-      add(gateList);
-    }
+    setupKnownGatesList();
+    add(GateControlPane.getControlPane());
+    setupBasicGateInfo();
+
     knownGates.addElement(new Gate("a", "Chulak"));
     knownGates.addElement(new Gate("b", "Gallifrey"));
     knownGates.addElement(new Gate("c", "Kronos"));
+    knownGates.addElement(new Gate("d", "Raxacoricofallapatorius"));
 
-    add(new JButton("2"));
-    add(new JButton("three"));
     setVisible(true);
   }
+
+  private void setupKnownGatesList() {
+    JPanel gateList = new JPanel(new BorderLayout());
+    JLabel gatesLabel = new JLabel("Gates", JLabel.CENTER);
+    gatesLabel.setFont(
+        new Font(gatesLabel.getFont().getName(), gatesLabel.getFont().getStyle(), 20));
+    gateList.add(gatesLabel, BorderLayout.NORTH);
+    JList<Gate> knownGatesList = new JList<>(this.knownGates);
+    knownGatesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    knownGatesList.setAlignmentY(TOP_ALIGNMENT);
+    gateList.add(knownGatesList, BorderLayout.CENTER);
+    add(gateList);
+  }
+
+  private void setupBasicGateInfo() {}
 }

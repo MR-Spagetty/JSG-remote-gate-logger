@@ -46,6 +46,7 @@ local function getCon()
       "init",
       name = conf.name,
       status = sg.getGateStatus(),
+      gateType = sg.getGateType(),
       dialed = sg.dialedAddress,
       hasDHD = component.isAvailable "dhd"
     }
@@ -113,6 +114,7 @@ local function execute(command)
       data = {
         "status",
         status = sg.getGateStatus(),
+        gateType = sg.getGateType(),
         dialed = sg.dialedAddress,
         hasDHD = component.isAvailable "dhd"
       }
