@@ -8,8 +8,7 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
-public abstract sealed class Server permits Server.InnerServer {
-  private final class InnerServer extends Server {}
+public abstract sealed class Server permits InnerServer {
 
   static Socket socket = new Socket();
   private static Scanner incoming;
@@ -60,3 +59,5 @@ public abstract sealed class Server permits Server.InnerServer {
     outgoing.print(packet.toString());
   }
 }
+
+final class InnerServer extends Server {}
