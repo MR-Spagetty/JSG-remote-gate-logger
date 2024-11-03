@@ -64,11 +64,11 @@ public class LuaTable implements LuaObject {
     dataByKey.entrySet().forEach(e -> iterator.accept(e.getKey(), e.getValue()));
   }
 
-  public Stream<LuaObject> stream(){
+  public Stream<LuaObject> stream() {
     return this.dataByIndex.stream();
   }
 
-  public Stream<LuaObject> parallelStream(){
+  public Stream<LuaObject> parallelStream() {
     return this.dataByIndex.parallelStream();
   }
 
@@ -131,18 +131,20 @@ public class LuaTable implements LuaObject {
     }
     LuaTable out = new LuaTable();
     data = match.group(1);
-    int end = 0;
     Matcher indexedValues = indexed.matcher(data);
-    while (indexedValues.find()) {
-      out.add(parseObject(indexedValues.group(1)));
-      end = indexedValues.end();
-    }
-    data = data.substring(end);
     Matcher keyedValues = keyed.matcher(data);
-    while (keyedValues.find()) {
-      String key = keyedValues.group(1);
-      String value = keyedValues.group(3);
-      out.put(key, parseObject(value));
+    int end = 0;
+    while (indexedValues.find(end) || keyedValues.find(end)) {
+      while (indexedValues.find(end)) {
+        out.add(parseObject(indexedValues.group(1)));
+        end = indexedValues.end();
+      }
+      while (keyedValues.find(end)) {
+        String key = keyedValues.group(1);
+        String value = keyedValues.group(3);
+        out.put(key, parseObject(value));
+        end = indexedValues.end();
+      }
     }
     return out;
   }
@@ -165,11 +167,15 @@ public class LuaTable implements LuaObject {
 
   public LuaTable merge(LuaTable b) {
     Stream.concat(stream(), b.stream()).forEach(this::add);
-    Stream.concat(this.dataByKey.entrySet().parallelStream().filter(e -> !b.dataByKey.containsKey(e.getKey())), b.dataByKey.entrySet().parallelStream()).forEach(e -> put(e.getKey(), e.getValue()));
+    Stream.concat(
+            this.dataByKey.entrySet().parallelStream()
+                .filter(e -> !b.dataByKey.containsKey(e.getKey())),
+            b.dataByKey.entrySet().parallelStream())
+        .forEach(e -> put(e.getKey(), e.getValue()));
     return this;
   }
 
-  public static LuaTable merge(LuaTable a, LuaTable b){
+  public static LuaTable merge(LuaTable a, LuaTable b) {
     LuaTable out = new LuaTable();
     out.merge(a);
     out.merge(b);
@@ -177,6 +183,6 @@ public class LuaTable implements LuaObject {
   }
 
   public LuaObject replace(int i, LuaObject newElm) {
-    return this.dataByIndex.set(i-1, newElm);
+    return this.dataByIndex.set(i - 1, newElm);
   }
 }
