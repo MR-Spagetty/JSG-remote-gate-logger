@@ -98,6 +98,15 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.6.1</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <configuration>
+            <mainClass>com.spag.gatelogger.server.App</mainClass>
+            <arguments>
+            </arguments>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
