@@ -16,9 +16,12 @@ public abstract sealed class Server permits InnerServer {
 
   public static boolean connect(String host, int port) {
     try {
-      socket.connect(new InetSocketAddress(host, port), 10_000);
+      socket.connect(new InetSocketAddress(host, port));
+      System.out.println(socket.isConnected());
       if (socket.isConnected()) {
+        System.out.println("connected");
         incoming = new Scanner(socket.getInputStream());
+        incoming.useDelimiter("\\Z");
         outgoing = new PrintWriter(socket.getOutputStream());
         LuaTable login = new LuaTable();
         login.put("data", LuaString.of("Hello world!"));
@@ -26,6 +29,7 @@ public abstract sealed class Server permits InnerServer {
         return true;
       }
     } catch (IOException e) {
+      System.out.println(e.getMessage());
     }
     return false;
   }
@@ -59,7 +63,8 @@ public abstract sealed class Server permits InnerServer {
     if (!socket.isConnected()) {
       throw new IllegalStateException("Not connected to server");
     }
-    outgoing.print(packet.toString());
+    outgoing.println(packet.toString());
+    outgoing.flush();
   }
 }
 
