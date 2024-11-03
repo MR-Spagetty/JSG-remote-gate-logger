@@ -2,15 +2,33 @@ package com.spag.gatelogger.client;
 
 import com.spag.gatelogger.client.data.Gate;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
 
 public class GUI extends JFrame {
+
+  public static final Dimension compPaneMin = new Dimension(200, 300);
+  public static final Dimension compPaneMax = new Dimension(600, Integer.MAX_VALUE);
+
   DefaultListModel<Gate> knownGates = new DefaultListModel<>();
 
   public GUI() {
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    setSize(400, 500);
+    setMinimumSize(
+        new Dimension(
+            2 * compPaneMin.width + GateControlPane.compPaneMin.width, compPaneMin.height));
+    setMaximumSize(
+        new Dimension(
+            2 * compPaneMax.width + GateControlPane.compPaneMax.width, compPaneMax.height));
     setContentPane(new Box(BoxLayout.X_AXIS));
     setupKnownGatesList();
     add(GateControlPane.getControlPane());
@@ -22,20 +40,38 @@ public class GUI extends JFrame {
     knownGates.addElement(new Gate("d", "Raxacoricofallapatorius"));
 
     setVisible(true);
+    GateControlPane.getControlPane().setTo(null);
   }
 
   private void setupKnownGatesList() {
-    JPanel gateList = new JPanel(new BorderLayout());
-    JLabel gatesLabel = new JLabel("Gates", JLabel.CENTER);
-    gatesLabel.setFont(
-        new Font(gatesLabel.getFont().getName(), gatesLabel.getFont().getStyle(), 20));
-    gateList.add(gatesLabel, BorderLayout.NORTH);
+    JPanel componentPane = new JPanel(new BorderLayout());
+    componentPane.setMinimumSize(compPaneMin);
+    componentPane.setMaximumSize(compPaneMax);
+    componentPane.setPreferredSize(componentPane.getMaximumSize());
+    JLabel componentLabel = new JLabel("Gates", JLabel.CENTER);
+    componentLabel.setFont(
+        new Font(componentLabel.getFont().getName(), componentLabel.getFont().getStyle(), 20));
+    componentPane.add(componentLabel, BorderLayout.NORTH);
     JList<Gate> knownGatesList = new JList<>(this.knownGates);
+    knownGatesList.setPreferredSize(componentPane.getMaximumSize());
     knownGatesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     knownGatesList.setAlignmentY(TOP_ALIGNMENT);
-    gateList.add(knownGatesList, BorderLayout.CENTER);
-    add(gateList);
+    componentPane.add(knownGatesList, BorderLayout.CENTER);
+    add(componentPane);
   }
 
-  private void setupBasicGateInfo() {}
+  private void setupBasicGateInfo() {
+    JPanel componentPane = new JPanel(new BorderLayout());
+    componentPane.setMinimumSize(compPaneMin);
+    componentPane.setMaximumSize(compPaneMax);
+    componentPane.setPreferredSize(componentPane.getMaximumSize());
+    JLabel componentLabel = new JLabel("Gate Info", JLabel.CENTER);
+    componentLabel.setFont(
+        new Font(componentLabel.getFont().getName(), componentLabel.getFont().getStyle(), 20));
+    componentPane.add(componentLabel, BorderLayout.NORTH);
+    componentPane.add(Box.createVerticalStrut(20), BorderLayout.CENTER);
+    JPanel gateInfo = new JPanel();
+    componentPane.add(gateInfo, BorderLayout.CENTER);
+    add(componentPane);
+  }
 }
