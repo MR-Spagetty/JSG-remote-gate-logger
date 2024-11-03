@@ -20,7 +20,7 @@ public class LuaTable implements LuaObject {
   public static final Pattern stringPat = Pattern.compile(stringRegex);
   public static final Pattern indexed =
       Pattern.compile(
-          "\\G("
+          "\\G\\s*("
               + braceRegex
               + "|"
               + numRegex
@@ -28,10 +28,10 @@ public class LuaTable implements LuaObject {
               + stringRegex
               + "|"
               + LuaObject.nil.toString()
-              + "|true|false),?");
+              + "|true|false)\\s*,?\\s*");
   public static final Pattern keyed =
       Pattern.compile(
-          "\\G(?:(\\w+)|\\[\\\"(.+)\\\"])=("
+          "\\G\\s*(?:(\\w+)|\\[\\\"(.+)\\\"])=("
               + braceRegex
               + "|"
               + numRegex
@@ -39,7 +39,7 @@ public class LuaTable implements LuaObject {
               + stringRegex
               + "|"
               + LuaObject.nil.toString()
-              + "|true|false),?");
+              + "|true|false)\\s*,?\\s*");
   private Map<String, LuaObject> dataByKey = new LinkedHashMap<>();
 
   private List<LuaObject> dataByIndex = new ArrayList<>();
