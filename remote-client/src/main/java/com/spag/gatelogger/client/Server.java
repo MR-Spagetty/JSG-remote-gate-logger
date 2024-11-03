@@ -14,7 +14,7 @@ public abstract sealed class Server permits InnerServer {
   private static Scanner incoming;
   private static PrintWriter outgoing;
 
-  public boolean connect(String host, int port) {
+  public static boolean connect(String host, int port) {
     try {
       socket.connect(new InetSocketAddress(host, port), 10_000);
       if (socket.isConnected()) {
