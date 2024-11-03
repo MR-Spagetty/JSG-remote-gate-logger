@@ -143,7 +143,7 @@ public class LuaTable implements LuaObject {
         String key = keyedValues.group(1);
         String value = keyedValues.group(3);
         out.put(key, parseObject(value));
-        end = indexedValues.end();
+        end = keyedValues.end();
       }
     }
     return out;
