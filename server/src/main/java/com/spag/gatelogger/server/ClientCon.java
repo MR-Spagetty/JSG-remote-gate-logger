@@ -60,28 +60,30 @@ public class ClientCon extends Connection {
             .map(c -> (LuaTable) c)
             .orElseThrow(() -> new DataFormatException("request data not found"))
             .stream()
-            .map(p -> (LuaString) p)
-            .map(p -> p.value)
+            .map(p -> p instanceof LuaString ? ((LuaString) p).value : p.toString())
             .toList();
-
-    responsePacket.put(
-        "data",
-        switch (command.get(0)) {
-          case "list" ->
-              GateCon.gateConns.stream()
-                  .map(c -> c.gate)
-                  .reduce(
-                      new LuaTable(),
-                      (t, g) -> {
-                        t.put(g.id, LuaString.of(g.name()));
-                        return t;
-                      },
-                      (a, b) -> a.merge(b));
-          default ->
-              gateRequest(
-                  command.get(0),
-                  command.subList(1, command.size()).stream().toArray(String[]::new));
-        });
+    if (command.isEmpty()) {
+      responsePacket.put("data", invalidCommand("No request given"));
+    } else {
+      responsePacket.put(
+          "data",
+          switch (command.get(0)) {
+            case "list" ->
+                GateCon.gateConns.stream()
+                    .map(c -> c.gate)
+                    .reduce(
+                        new LuaTable(),
+                        (t, g) -> {
+                          t.put(g.id, LuaString.of(g.name()));
+                          return t;
+                        },
+                        (a, b) -> a.merge(b));
+            default ->
+                gateRequest(
+                    command.get(0),
+                    command.subList(1, command.size()).stream().toArray(String[]::new));
+          });
+    }
     responsePacket.add(LuaString.of("" + System.currentTimeMillis() / 1000));
     sendPacket(responsePacket);
   }
