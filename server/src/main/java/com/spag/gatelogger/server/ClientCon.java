@@ -19,6 +19,7 @@ public class ClientCon extends Connection {
   @Override
   protected void startUp() {
     LuaTable connPacket = LuaTable.fromString(readPacket());
+    System.out.println(connPacket.get("data"));
     LuaTable welcome = new LuaTable();
     welcome.put("type", LuaString.of("welcome"));
     LuaTable welcomeData = new LuaTable();

@@ -20,6 +20,9 @@ public abstract sealed class Server permits InnerServer {
       if (socket.isConnected()) {
         incoming = new Scanner(socket.getInputStream());
         outgoing = new PrintWriter(socket.getOutputStream());
+        LuaTable login = new LuaTable();
+        login.put("data", LuaString.of("Hello world!"));
+        send(login);
         return true;
       }
     } catch (IOException e) {
