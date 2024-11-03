@@ -33,7 +33,7 @@ public abstract class Connection extends Thread {
   protected final PrintWriter outgoing;
 
   public final void sendPacket(LuaTable packetData) {
-    this.outgoing.print(packetData.toString());
+    this.outgoing.println(packetData.toString());
     this.outgoing.flush();
   }
 
