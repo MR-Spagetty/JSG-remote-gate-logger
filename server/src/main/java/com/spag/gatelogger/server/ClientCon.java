@@ -2,7 +2,6 @@ package com.spag.gatelogger.server;
 
 import com.spag.gatelogger.server.data.DataFormatException;
 import com.spag.lua.*;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
@@ -40,7 +39,8 @@ public class ClientCon extends Connection {
   @Override
   protected void doPacket(LuaTable packet) {
     String type =
-        Optional.of(packet.get("type")).filter(t -> t != LuaObject.nil)
+        Optional.of(packet.get("type"))
+            .filter(t -> t != LuaObject.nil)
             .map(t -> (LuaString) t)
             .map(t -> t.value)
             .orElse("none");
@@ -55,7 +55,8 @@ public class ClientCon extends Connection {
     LuaTable responsePacket = new LuaTable();
     responsePacket.put("to", requestPacket);
     List<String> command =
-        Optional.ofNullable(requestPacket.get("data"))
+        Optional.of(requestPacket.get("data"))
+            .filter(p -> p != LuaObject.nil)
             .map(c -> (LuaTable) c)
             .orElseThrow(() -> new DataFormatException("request data not found"))
             .stream()
@@ -77,7 +78,9 @@ public class ClientCon extends Connection {
                       },
                       (a, b) -> a.merge(b));
           default ->
-              gateRequest(command.get(0), command.subList(1, command.size()).stream().toArray(String[]::new));
+              gateRequest(
+                  command.get(0),
+                  command.subList(1, command.size()).stream().toArray(String[]::new));
         });
     responsePacket.add(LuaString.of("" + System.currentTimeMillis() / 1000));
     sendPacket(responsePacket);
