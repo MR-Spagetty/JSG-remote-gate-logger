@@ -40,10 +40,10 @@ public class ClientCon extends Connection {
   @Override
   protected void doPacket(LuaTable packet) {
     String type =
-        Optional.ofNullable(packet.get("type"))
+        Optional.of(packet.get("type")).filter(t -> t != LuaObject.nil)
             .map(t -> (LuaString) t)
             .map(t -> t.value)
-            .orElse(null);
+            .orElse("none");
     switch (type) {
       case "request" -> handleRequest(packet);
       case "response" -> {}
@@ -77,7 +77,7 @@ public class ClientCon extends Connection {
                       },
                       (a, b) -> a.merge(b));
           default ->
-              gateRequest(command.get(0), (String[]) command.subList(1, command.size()).toArray());
+              gateRequest(command.get(0), command.subList(1, command.size()).stream().toArray(String[]::new));
         });
     responsePacket.add(LuaString.of("" + System.currentTimeMillis() / 1000));
     sendPacket(responsePacket);
