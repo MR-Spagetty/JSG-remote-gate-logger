@@ -64,9 +64,9 @@ public class GateCon extends Connection {
     }
   }
 
-  private List<GateSubscriber> subs = List.of();
+  private List<GateResponseSubscriber> subs = List.of();
 
-  public void subscribe(GateSubscriber sub) {
+  public void subscribe(GateResponseSubscriber sub) {
     this.subs = Stream.concat(this.subs.stream(), Stream.of(sub)).toList();
   }
 

@@ -134,7 +134,7 @@ public class ClientCon extends Connection {
         case "info" -> {
           if (nParams == 0) {
             selected.subscribe(
-                new GateSubscriber(
+                new GateResponseSubscriber(
                     "status",
                     d -> {
                       out.merge((LuaTable) d.get("data"));

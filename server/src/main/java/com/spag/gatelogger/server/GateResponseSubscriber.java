@@ -5,9 +5,9 @@ import java.util.function.Predicate;
 
 import com.spag.lua.*;
 
-public record GateSubscriber(Predicate<LuaTable> classifier, Consumer<LuaTable> handler) {
+public record GateResponseSubscriber(Predicate<LuaTable> classifier, Consumer<LuaTable> handler) implements PacketSubscriber{
 
-  public GateSubscriber(String type, Consumer<LuaTable> handler) {
+  public GateResponseSubscriber(String type, Consumer<LuaTable> handler) {
     this(p -> ((LuaString) ((LuaTable) p.get("data")).get(1)).value.equals(type), handler);
   }
 }
