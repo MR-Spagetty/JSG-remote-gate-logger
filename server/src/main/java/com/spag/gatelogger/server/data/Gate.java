@@ -52,6 +52,20 @@ public class Gate {
     this.name = newName;
   }
 
+  public GateType type() {
+    return this.type;
+  }
+
+  public Glyph[] address(GateType type) {
+    return Optional.ofNullable(this.gateAddresses.get(type))
+        .orElseThrow(
+            () -> new IllegalArgumentException("Unknown Gate type: \"%s\"".formatted(type)));
+  }
+
+  public boolean hasDHD() {
+    return this.hasDHD;
+  }
+
   /*example init packet:
   {"03/02/70 04:28:08",id="1eb0a1e1-9a12-41e9-a297-76bd6485d70d",type="init",data={"init",hasDHD=false,dialed="[]",status="idle",gateType="MILKYWAY",name="Chulak"}} */
   public static Gate of(LuaTable init) {
