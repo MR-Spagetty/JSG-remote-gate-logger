@@ -53,7 +53,7 @@ public class GateCon extends Connection {
         if (packet.get("data") == LuaObject.nil) {
           return;
         }
-        this.subs.parallelStream().filter(s -> s.classifier().test(packet)).toList().stream()
+        this.subs.parallelStream().filter(s -> s instanceof GateResponseSubscriber).filter(s -> s.classifier().test(packet)).toList().stream()
             .forEach(
                 sr -> {
                   sr.handler().accept(packet);
@@ -64,9 +64,9 @@ public class GateCon extends Connection {
     }
   }
 
-  private List<GateResponseSubscriber> subs = List.of();
+  private List<PacketSubscriber> subs = List.of();
 
-  public void subscribe(GateResponseSubscriber sub) {
+  public void subscribe(PacketSubscriber sub) {
     this.subs = Stream.concat(this.subs.stream(), Stream.of(sub)).toList();
   }
 

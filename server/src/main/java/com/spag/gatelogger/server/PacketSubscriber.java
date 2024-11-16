@@ -8,4 +8,6 @@ public interface PacketSubscriber {
   public Predicate<LuaTable> classifier();
 
   public Consumer<LuaTable> handler();
+
+  public boolean isSingleUse();
 }
