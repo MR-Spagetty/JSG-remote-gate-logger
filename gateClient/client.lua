@@ -111,6 +111,7 @@ local function execute(command)
     os.execute("reboot")
   elseif command[1] == "status" then
     con.write(serial.serialize { os.date(), id = sg.address,
+      type = "response"
       data = {
         "status",
         status = sg.getGateStatus(),
