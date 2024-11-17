@@ -17,6 +17,7 @@ public class GateControlPane extends JPanel {
     setMinimumSize(compPaneMin);
     setMaximumSize(compPaneMax);
     setPreferredSize(getMaximumSize());
+    setTo(null);
   }
 
   private static final GateControlPane INSTANCE = new GateControlPane();
@@ -28,7 +29,7 @@ public class GateControlPane extends JPanel {
   public void setTo(String gateID) {
     removeAll();
     JLabel paneLabel = new JLabel("Gate Control", JLabel.CENTER);
-    paneLabel.setFont(new Font(paneLabel.getFont().getName(), paneLabel.getFont().getStyle(), 20));
+    paneLabel.setFont(new Font(paneLabel.getFont().getName(), paneLabel.getFont().getStyle(), GUI.compHeadingFontSize));
     add(paneLabel, BorderLayout.NORTH);
     JPanel controlPanel = new JPanel();
     add(controlPanel, BorderLayout.CENTER);
