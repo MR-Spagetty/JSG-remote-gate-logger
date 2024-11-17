@@ -18,8 +18,8 @@ public class GUI extends JFrame {
 
   static final int compHeadingFontSize = 20;
   static final int compItemHeadingFontSize = 16;
-  public static final Dimension compPaneMin = new Dimension(200, 300);
-  public static final Dimension compPaneMax = new Dimension(600, Integer.MAX_VALUE);
+  public static final Dimension compPaneMin = new Dimension(550, 800);
+  public static final Dimension compPaneMax = new Dimension(1000, Integer.MAX_VALUE);
 
   DefaultListModel<Gate> knownGates = new DefaultListModel<>();
 
@@ -51,7 +51,10 @@ public class GUI extends JFrame {
     componentPane.setPreferredSize(componentPane.getMaximumSize());
     JLabel componentLabel = new JLabel("Gates", JLabel.CENTER);
     componentLabel.setFont(
-        new Font(componentLabel.getFont().getName(), componentLabel.getFont().getStyle(), compHeadingFontSize));
+        new Font(
+            componentLabel.getFont().getName(),
+            componentLabel.getFont().getStyle(),
+            compHeadingFontSize));
     componentPane.add(componentLabel, BorderLayout.NORTH);
     JList<Gate> knownGatesList = new JList<>(this.knownGates);
     knownGatesList.setPreferredSize(componentPane.getMaximumSize());
@@ -68,7 +71,10 @@ public class GUI extends JFrame {
     componentPane.setPreferredSize(componentPane.getMaximumSize());
     JLabel componentLabel = new JLabel("Gate Info", JLabel.CENTER);
     componentLabel.setFont(
-        new Font(componentLabel.getFont().getName(), componentLabel.getFont().getStyle(), compHeadingFontSize));
+        new Font(
+            componentLabel.getFont().getName(),
+            componentLabel.getFont().getStyle(),
+            compHeadingFontSize));
     componentPane.add(componentLabel, BorderLayout.NORTH);
     // componentPane.add(Box.createVerticalStrut(20), BorderLayout.CENTER);
     componentPane.add(GateInfoPane.getInfoPane(), BorderLayout.CENTER);
