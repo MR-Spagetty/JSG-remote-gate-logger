@@ -89,15 +89,15 @@ public class GateInfoPane extends JPanel {
     }
     LuaTable queryData = (LuaTable) Server.query("info", gate.id()).get("data");
     System.out.println(queryData);
-    if (queryData.get(1).equals( LuaString.of("invalid command"))) {
+    if (queryData.get(1).equals(LuaString.of("invalid command"))) {
       setTo(null);
       return;
     }
 
     this.name.setText(gate.name());
     this.compAddr.setText(gate.id());
-    this.gateType.setText(((LuaString)queryData.get("gateType")).value);
-    this.status.setText(((LuaString)queryData.get("status")).value);
-    this.hasDHD.setText(((LuaBool)queryData.get("hasDHD")).get()?"DHD":"NO DHD");
+    this.gateType.setText(((LuaString) queryData.get("gateType")).value);
+    this.status.setText(((LuaString) queryData.get("status")).value);
+    this.hasDHD.setText(((LuaBool) queryData.get("hasDHD")).get() ? "DHD" : "NO DHD");
   }
 }
