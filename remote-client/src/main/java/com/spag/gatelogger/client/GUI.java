@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 public class GUI extends JFrame {
@@ -20,6 +21,8 @@ public class GUI extends JFrame {
   static final int compItemHeadingFontSize = 16;
   public static final Dimension compPaneMin = new Dimension(550, 800);
   public static final Dimension compPaneMax = new Dimension(1000, Integer.MAX_VALUE);
+  private Gate selectedGate = null;
+  private Timer refreshTimer = new Timer(500, e -> this.refresh());
 
   DefaultListModel<Gate> knownGates = new DefaultListModel<>();
 
@@ -62,9 +65,14 @@ public class GUI extends JFrame {
     knownGatesList.setAlignmentY(TOP_ALIGNMENT);
     knownGatesList.addListSelectionListener(
         e -> {
-          Gate gate = knownGatesList.getSelectedValue();
-          GateInfoPane.getInfoPane().setTo(gate);
-          GateControlPane.getControlPane().setTo(gate);
+          selectedGate = knownGatesList.getSelectedValue();
+          if (selectedGate != null) {
+            refreshTimer.start();
+          } else {
+            refreshTimer.stop();
+          }
+          GateControlPane.getControlPane().setTo(selectedGate);
+          refresh();
         });
     componentPane.add(knownGatesList, BorderLayout.CENTER);
     add(componentPane);
@@ -85,5 +93,10 @@ public class GUI extends JFrame {
     // componentPane.add(Box.createVerticalStrut(20), BorderLayout.CENTER);
     componentPane.add(GateInfoPane.getInfoPane(), BorderLayout.CENTER);
     add(componentPane);
+  }
+
+  private void refresh() {
+    GateInfoPane.getInfoPane().setTo(selectedGate);
+    GateControlPane.getControlPane().refresh();
   }
 }
