@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,34 +13,23 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class LuaTable implements LuaObject {
-  public static final String braceRegex = "\\{((?:[^{}]*\\{[^{}]*\\})*[^{}]*?)\\}";
+  public static final String braceRegex =
+      "^\\{(.*)\\}$"; // "\\{((?:[^{}]*\\{[^{}]*\\})*[^{}]*?)\\}";
   public static final Pattern bracePat = Pattern.compile(braceRegex);
   static final String numRegex = "[1-9][0-9]*\\.[0-9]+" + "|0\\.[0-9]+" + "|0|[1-9][0-9]*";
   public static final Pattern numPat = Pattern.compile(numRegex);
-  static final String stringRegex = "\\\".*?[^\\\\]\\\"";
+  static final String stringRegex = "\\\".*?[^\\\\]\\\"|\\\"\\\"";
   public static final Pattern stringPat = Pattern.compile(stringRegex);
   public static final Pattern indexed =
       Pattern.compile(
           "\\G\\s*("
-              + braceRegex
-              + "|"
-              + numRegex
-              + "|"
               + stringRegex
               + "|"
+              + numPat
+              + "|\\{((?:[^{}]++|\\{(?:[^{}]++|\\{[^{}]*\\})*\\})*)\\}|"
               + LuaObject.nil.toString()
-              + "|true|false)\\s*,?\\s*");
-  public static final Pattern keyed =
-      Pattern.compile(
-          "\\G\\s*(?:(\\w+)|\\[\\\"(.+)\\\"])=("
-              + braceRegex
-              + "|"
-              + numRegex
-              + "|"
-              + stringRegex
-              + "|"
-              + LuaObject.nil.toString()
-              + "|true|false)\\s*,?\\s*");
+              + "|true|false)\\s*(?:,|\\Z)\\s*");
+  public static final Pattern keyed = Pattern.compile("\\G\\s*(?:(\\w+)|\\[\\\"(.+)\\\"])=");
   private Map<String, LuaObject> dataByKey = new LinkedHashMap<>();
 
   private List<LuaObject> dataByIndex = new ArrayList<>();
@@ -50,15 +40,7 @@ public class LuaTable implements LuaObject {
         .forEach(i -> iterator.accept(i, this.dataByIndex.get(i - 1)));
   }
 
-  private void clearNilAssociatedKeys() {
-    dataByKey.entrySet().stream().toList().stream()
-        .filter(e -> e.getValue() == LuaObject.nil)
-        .map(e -> e.getKey())
-        .forEach(dataByKey::remove);
-  }
-
   public void pairs(BiConsumer<String, LuaObject> iterator) {
-    clearNilAssociatedKeys();
     IntStream.range(1, dataByIndex.size())
         .forEach(i -> iterator.accept("" + i, this.dataByIndex.get(i)));
     dataByKey.entrySet().forEach(e -> iterator.accept(e.getKey(), e.getValue()));
@@ -77,11 +59,14 @@ public class LuaTable implements LuaObject {
   }
 
   public LuaObject put(String key, LuaObject value) {
-    try {
-      return this.dataByKey.put(key, value);
-    } finally {
-      clearNilAssociatedKeys();
+    if (value == LuaObject.nil) {
+      if (this.dataByKey.containsKey(key)) {
+        return dataByKey.remove(key);
+      }
+      return LuaObject.nil;
     }
+
+    return Optional.ofNullable(this.dataByKey.put(key, value)).orElse(LuaObject.nil);
   }
 
   public LuaObject get(int index) {
@@ -136,14 +121,18 @@ public class LuaTable implements LuaObject {
     int end = 0;
     while (indexedValues.find(end) || keyedValues.find(end)) {
       while (indexedValues.find(end)) {
-        out.add(parseObject(indexedValues.group(1)));
+        String val = indexedValues.group(1);
         end = indexedValues.end();
+        out.add(parseObject(val));
       }
       while (keyedValues.find(end)) {
         String key = keyedValues.group(1);
-        String value = keyedValues.group(3);
-        out.put(key, parseObject(value));
-        end = keyedValues.end();
+        if (!indexedValues.find(keyedValues.end())) {
+          throw new IllegalArgumentException("Invalid lua table, no value for key: " + key);
+        }
+        String val = indexedValues.group(1);
+        end = indexedValues.end();
+        out.put(key, parseObject(val));
       }
     }
     return out;

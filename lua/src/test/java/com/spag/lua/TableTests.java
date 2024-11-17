@@ -89,7 +89,8 @@ public class TableTests {
             + "id=\""
             + id
             + "\","
-            + "data={\"init\",hasDHD=false,dialed=\"[]\",status=\"idle\",name=\"Chulak\"}}";
+            + "data={\"init\",hasDHD=false,dialed=\"[]\",status=\"idle\",name=\"Chulak\"},"
+            +"two={threee={4}}}";
 
     LuaTable intermed = LuaTable.fromString(start);
     assertEquals(LuaString.of(date), intermed.get(1));
