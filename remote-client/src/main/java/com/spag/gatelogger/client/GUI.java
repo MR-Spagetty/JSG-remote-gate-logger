@@ -23,7 +23,9 @@ public class GUI extends JFrame {
 
   DefaultListModel<Gate> knownGates = new DefaultListModel<>();
 
-  public GUI() {
+  public static final GUI GUI = new GUI();
+
+  private GUI() {
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     setMinimumSize(
         new Dimension(
@@ -40,8 +42,6 @@ public class GUI extends JFrame {
     knownGates.addElement(new Gate("b", "Gallifrey"));
     knownGates.addElement(new Gate("c", "Kronos"));
     knownGates.addElement(new Gate("d", "Raxacoricofallapatorius"));
-
-    setVisible(true);
   }
 
   private void setupKnownGatesList() {
@@ -60,6 +60,12 @@ public class GUI extends JFrame {
     knownGatesList.setPreferredSize(componentPane.getMaximumSize());
     knownGatesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     knownGatesList.setAlignmentY(TOP_ALIGNMENT);
+    knownGatesList.addListSelectionListener(
+        e -> {
+          Gate gate = knownGatesList.getSelectedValue();
+          GateInfoPane.getInfoPane().setTo(gate);
+          GateControlPane.getControlPane().setTo(gate);
+        });
     componentPane.add(knownGatesList, BorderLayout.CENTER);
     add(componentPane);
   }

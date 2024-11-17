@@ -138,21 +138,26 @@ public class ClientCon extends Connection {
           selected.sendPacket(packet);
         }
         case "info" -> {
-          if (nParams == 0) {
-            selected.subscribe(
-                new GateResponseSubscriber(
-                    "status",
-                    d -> {
-                      out.merge((LuaTable) d.get("data"));
-                      this.notify();
-                    }));
-          } else {
-            return invalidCommand(
-                "Unknown request \"info %s\""
-                    .formatted(Stream.of(params).collect(Collectors.joining(" "))));
+          synchronized (selected.monitor) {
+            if (nParams == 0) {
+              selected.subscribe(
+                  new GateResponseSubscriber(
+                      "status",
+                      d -> {
+                        out.merge((LuaTable) d.get("data"));
+                      }));
+            } else {
+              return invalidCommand(
+                  "Unknown request \"info %s\""
+                      .formatted(Stream.of(params).collect(Collectors.joining(" "))));
+            }
+            LuaTable packet = new LuaTable();
+            packet.add(LuaString.of("status"));
+            selected.sendPacket(packet);
+            selected.monitor.wait();
           }
-          this.wait();
-          out.replace(0, LuaString.of(""));
+          System.out.println("Resposne recieved");
+          out.replace(1, LuaString.of(""));
         }
         case "close" -> {}
         default -> invalidCommand("Unknown request \"%s\"".formatted(command));

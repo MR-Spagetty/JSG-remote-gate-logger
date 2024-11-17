@@ -55,7 +55,14 @@ public abstract sealed class Server permits InnerServer {
     String output = "";
     while (!LuaTable.bracePat.matcher(output.trim()).matches()) {
       output += incoming.nextLine() + "\n";
+      System.out.println(
+          """
+            --------------------------
+            %s
+            --------------------------
+          """.formatted(output));
     }
+    System.out.println("Recieved packet:\n" + output);
     return LuaTable.fromString(output.trim());
   }
 

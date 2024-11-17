@@ -1,6 +1,8 @@
 package com.spag.gatelogger.client;
 
+import com.spag.gatelogger.client.data.Gate;
 import com.spag.gatelogger.client.util.DisplayButton;
+import com.spag.lua.*;
 import java.awt.Font;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -78,5 +80,24 @@ public class GateInfoPane extends JPanel {
     this.status.setText("Unknown");
     this.hasDHD.setText("NO DHD");
     // this.hasDHD.setIcon();
+  }
+
+  public void setTo(Gate gate) {
+    if (gate == null) {
+      initInfoFieldsData();
+      return;
+    }
+    LuaTable queryData = (LuaTable) Server.query("info", gate.id()).get("data");
+    System.out.println(queryData);
+    if (queryData.get(1).equals( LuaString.of("invalid command"))) {
+      setTo(null);
+      return;
+    }
+
+    this.name.setText(gate.name());
+    this.compAddr.setText(gate.id());
+    this.gateType.setText(((LuaString)queryData.get("gateType")).value);
+    this.status.setText(((LuaString)queryData.get("status")).value);
+    this.hasDHD.setText(((LuaBool)queryData.get("hasDHD")).get()?"DHD":"NO DHD");
   }
 }

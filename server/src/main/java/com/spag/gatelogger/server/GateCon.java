@@ -2,7 +2,6 @@ package com.spag.gatelogger.server;
 
 import com.spag.gatelogger.server.data.Gate;
 import com.spag.lua.*;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
@@ -12,6 +11,8 @@ import java.util.stream.Stream;
 public class GateCon extends Connection {
 
   public static List<GateCon> gateConns = List.of();
+
+  public final Object monitor = new Object();
 
   public GateCon(Socket connectionSocket) {
     super(connectionSocket);
@@ -50,15 +51,22 @@ public class GateCon extends Connection {
       case "init" -> this.gate = Gate.of(packet);
       case "stargate", "modem", "other" -> this.gate.logData(packet);
       case "response" -> {
-        if (packet.get("data") == LuaObject.nil) {
-          return;
+        synchronized (monitor) {
+          if (packet.get("data") == LuaObject.nil) {
+            return;
+          }
+          this.subs.parallelStream()
+              .filter(s -> s instanceof GateResponseSubscriber)
+              .filter(s -> s.classifier().test(packet))
+              .toList()
+              .stream()
+              .forEach(
+                  sr -> {
+                    sr.handler().accept(packet);
+                    this.subs = this.subs.parallelStream().filter(s -> s != sr).toList();
+                  });
+          monitor.notify();
         }
-        this.subs.parallelStream().filter(s -> s instanceof GateResponseSubscriber).filter(s -> s.classifier().test(packet)).toList().stream()
-            .forEach(
-                sr -> {
-                  sr.handler().accept(packet);
-                  this.subs = this.subs.parallelStream().filter(s -> s != sr).toList();
-                });
       }
       default -> {}
     }
