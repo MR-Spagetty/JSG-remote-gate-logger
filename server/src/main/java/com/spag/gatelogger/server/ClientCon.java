@@ -1,6 +1,7 @@
 package com.spag.gatelogger.server;
 
 import com.spag.gatelogger.server.data.DataFormatException;
+import com.spag.gatelogger.server.data.Gate;
 import com.spag.lua.*;
 import java.io.IOException;
 import java.net.Socket;
@@ -138,6 +139,7 @@ public class ClientCon extends Connection {
           selected.sendPacket(packet);
         }
         case "info" -> {
+          LuaTable packet = new LuaTable();
           synchronized (selected.monitor) {
             if (nParams == 0) {
               selected.subscribe(
@@ -146,13 +148,39 @@ public class ClientCon extends Connection {
                       d -> {
                         out.merge((LuaTable) d.get("data"));
                       }));
+              packet.add(LuaString.of("status"));
+            } else if (nParams == 1) {
+              switch (params[1]) {
+                case "address" -> {
+                  selected.subscribe(
+                      new GateResponseSubscriber(
+                          "address",
+                          d -> {
+                            selected.gate.updateAddresses((LuaTable) d.get("address"));
+                          }));
+                  packet.add(LuaString.of("address"));
+                }
+                case "dialed" -> {
+                  selected.subscribe(
+                      new GateResponseSubscriber(
+                          "dialed",
+                          d -> {
+                            selected.gate.dialedAddress =
+                                Gate.addressOf(selected.gate.type(), (LuaTable) d.get("address"));
+                          }));
+                  packet.add(LuaString.of("dialed"));
+                }
+                default -> {
+                  return invalidCommand(
+                      "Unknown request \"info %s\""
+                          .formatted(Stream.of(params).collect(Collectors.joining(" "))));
+                }
+              }
             } else {
               return invalidCommand(
                   "Unknown request \"info %s\""
                       .formatted(Stream.of(params).collect(Collectors.joining(" "))));
             }
-            LuaTable packet = new LuaTable();
-            packet.add(LuaString.of("status"));
             selected.sendPacket(packet);
             selected.monitor.wait();
           }

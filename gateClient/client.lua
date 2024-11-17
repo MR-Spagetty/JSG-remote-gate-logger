@@ -120,6 +120,22 @@ local function execute(command)
         hasDHD = component.isAvailable "dhd"
       }
     })
+  elseif command[1] == "dialed" then
+    con.write (serial.serialize { os.date(), id = sg.address,
+      type="response",
+      data = {
+        "dialed",
+        address = sg.dialedAddress
+      }
+    })
+  elseif command[1] == "address" then
+    con.write (serial.serialize { os.date(), id = sg.address,
+      type="response",
+      data = {
+        "address",
+        address = sg.stargateAddress
+      }
+    })
   elseif command[1] == "stop" then
     sendEvent({ os.date(), id = sg.address, type = "bye bye" })
     con.close()

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Gate {
   private static final Map<String, Gate> cache = new HashMap<>();
@@ -16,8 +19,8 @@ public class Gate {
   List<LuaTable> modemData = new ArrayList<>();
   List<LuaTable> otherData = new ArrayList<>();
 
-  Map<GateType, Glyph[]> gateAddresses = new HashMap<>();
-  Glyph[] dialedAddress = new Glyph[9];
+  public Map<GateType, Glyph[]> gateAddresses = new HashMap<>();
+  public Glyph[] dialedAddress = new Glyph[9];
   private boolean hasDHD = false;
 
   private Gate(String id) {
@@ -62,6 +65,26 @@ public class Gate {
             () -> new IllegalArgumentException("Unknown Gate type: \"%s\"".formatted(type)));
   }
 
+  public LuaTable addressesAsLua() {
+    LuaTable addreses = new LuaTable();
+    gateAddresses.entrySet().stream()
+        .forEach(
+            ae -> {
+              LuaTable addr = new LuaTable();
+              Stream.of(ae.getValue()).map(g -> LuaString.of(g.name())).forEach(addr::add);
+              addreses.put(ae.getKey().toString(), addr);
+            });
+    return addreses;
+  }
+
+  public void updateAddresses(LuaTable addreses) {
+    addreses.pairs(
+        (t, addr) -> {
+          GateType type = GateType.valueOf(t);
+          this.gateAddresses.put(type, addressOf(type, (LuaTable) addr));
+        });
+  }
+
   public boolean hasDHD() {
     return this.hasDHD;
   }
@@ -80,5 +103,29 @@ public class Gate {
                         ((LuaString) (((LuaTable) init.get("data")).get("gateType"))).value)));
     gate.hasDHD = ((LuaBool) (((LuaTable) init.get("data")).get("hasDHD"))).get();
     return gate;
+  }
+
+  public static Glyph[] addressOf(GateType type, String serialAddress) {
+    Glyph[] glyphs = new Glyph[9];
+    final Pattern serialAddr =
+        Pattern.compile(
+            "^\\[(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+),"
+                + " )?(?:([^,]+), )?(?:([^,]+), )?(.*?)]$");
+    MatchResult mr = serialAddr.matcher(serialAddress).toMatchResult();
+    if (!mr.hasMatch()) {
+      throw new IllegalArgumentException("Invalid serialized address: " + serialAddress);
+    }
+    for (int i = 0; i < Math.min(glyphs.length, mr.groupCount()); i++) {
+      glyphs[i] = Glyph.glyphGetters.get(type).apply(mr.group());
+    }
+    return glyphs;
+  }
+
+  public static Glyph[] addressOf(GateType type, LuaTable address) {
+    Glyph[] glyphs = new Glyph[9];
+    for (int i = 0; i < glyphs.length; i++) {
+      glyphs[i] = Glyph.glyphGetters.get(type).apply(((LuaString) address.get(i)).value);
+    }
+    return glyphs;
   }
 }
