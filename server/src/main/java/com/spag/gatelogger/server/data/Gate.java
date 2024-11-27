@@ -33,6 +33,30 @@ public class Gate {
     this.type = type;
   }
 
+  private Gate(String id, LuaTable data) {
+    this(id);
+    Optional<LuaObject> name = Optional.of(data.get("name")).filter(elm -> elm == LuaObject.nil);
+    if (name.isPresent()) {
+      LuaObject nameO = name.get();
+      if (nameO instanceof LuaString nameString) {
+        this.name = nameString.value;
+      } else {
+        throw new DataFormatException(
+            "Expected a LuaString for name but got: \"%s\"".formatted(nameO.type()));
+      }
+    }
+    Optional<LuaObject> type = Optional.of(data.get("name")).filter(elm -> elm == LuaObject.nil);
+    if (type.isPresent()) {
+      LuaObject typeO = type.get();
+      if (typeO instanceof LuaString typeString) {
+        this.type = GateType.valueOf(typeString.value);
+      } else {
+        throw new DataFormatException(
+            "Expected a LuaString for name but got: \"%s\"".formatted(typeO.type()));
+      }
+    }
+  }
+
   public String name() {
     return this.name;
   }
@@ -92,16 +116,26 @@ public class Gate {
   /*example init packet:
   {"03/02/70 04:28:08",id="1eb0a1e1-9a12-41e9-a297-76bd6485d70d",type="init",data={"init",hasDHD=false,dialed="[]",status="idle",gateType="MILKYWAY",name="Chulak"}} */
   public static Gate of(LuaTable init) {
-    Gate gate =
-        cache.computeIfAbsent(
-            ((LuaString) init.get("id")).value,
-            id ->
-                new Gate(
-                    id,
-                    ((LuaString) (((LuaTable) init.get("data")).get("name"))).value,
-                    GateType.valueOf(
-                        ((LuaString) (((LuaTable) init.get("data")).get("gateType"))).value)));
-    gate.hasDHD = ((LuaBool) (((LuaTable) init.get("data")).get("hasDHD"))).get();
+    LuaObject id = init.get("id");
+    if (!(id instanceof LuaString)) {
+      throw new DataFormatException(
+          "Expected LuaString for id, got: \"%s\" in:\n%s".formatted(id.type(), init));
+    }
+    Gate gate;
+    LuaObject data = init.get("data");
+    if (data != LuaObject.nil) {
+      if (!(data instanceof LuaTable)) {
+        throw new DataFormatException(
+            "Expected LuaTable or nil for data but got \"%s\"".formatted(data.type()));
+      }
+      gate =
+          cache.computeIfAbsent(((LuaString) id).value, newID -> new Gate(newID, (LuaTable) data));
+      gate.hasDHD = ((LuaBool) (((LuaTable) init.get("data")).get("hasDHD"))).get();
+    } else {
+      gate =
+          Optional.ofNullable(cache.get(((LuaString) id).value))
+              .orElseThrow(() -> new IllegalArgumentException("Unknown gate: %s".formatted(id)));
+    }
     return gate;
   }
 
