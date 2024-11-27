@@ -29,7 +29,7 @@ public enum LuaBool implements LuaObject {
    * <p>for use in parseing serialized lua data
    *
    * @param value the string to encode
-   * @return teh LuaBool constant
+   * @return the LuaBool constant
    * @throws IllegalArgumentException if an invalid string is given (ie. not "true" or "false")
    */
   static LuaBool of(String value) {

@@ -85,7 +85,7 @@ public class LuaTable implements LuaObject {
   /**
    * Get the element at the given key
    *
-   * <p>if there is no element at teh given key nil will be returned as in lua
+   * <p>if there is no element at the given key nil will be returned as in lua
    *
    * @param key the key to get the item at
    * @return the element at the given key or nil if ther eis no element at the given key
@@ -97,12 +97,12 @@ public class LuaTable implements LuaObject {
   }
 
   /**
-   * put a new element in the table at teh given key
+   * put a new element in the table at the given key
    *
    * @param key the key to put the element at
-   * @param value the element to put at teh key
+   * @param value the element to put at the key
    * @return the old element at the key
-   * @throws NullPointerException if eitehr the key or the element given are null
+   * @throws NullPointerException if either the key or the element given are null
    * @implNote if the new element is nil this simply removes the old element
    */
   public LuaObject put(String key, LuaObject value) {
@@ -145,12 +145,12 @@ public class LuaTable implements LuaObject {
   }
 
   /**
-   * inserts the new element at teh given index
+   * inserts the new element at the given index
    *
    * <p>shifts element at and after the given index to a higher index
    *
    * @param index the index to insert he element at
-   * @param value the element to insert at teh given index
+   * @param value the element to insert at the given index
    * @throws NullPointerException if the new element is null
    * @implNote reminder indexed values are indexed from 1
    */
@@ -160,7 +160,7 @@ public class LuaTable implements LuaObject {
   }
 
   /**
-   * replaces the element at teh given index
+   * replaces the element at the given index
    *
    * @param i the index to replace
    * @param newElm the new element
@@ -225,10 +225,10 @@ public class LuaTable implements LuaObject {
   }
 
   /**
-   * creates a new table combinding teh data from the given data where a is merged first and then b
+   * creates a new table combinding the data from the given data where a is merged first and then b
    *
-   * @param a teh first table to merge teh data from
-   * @param b the second table to merge teh data from
+   * @param a the first table to merge the data from
+   * @param b the second table to merge the data from
    * @return the table containing th emerged data
    * @see #merge(LuaTable) LuaTable.merge(LuaTable) for merge rules
    */
@@ -245,7 +245,7 @@ public class LuaTable implements LuaObject {
    * <p>deserializes the table from the Minecraft OpenComputers mod's serialization format into a
    * representation of the oringonal LuaTable using the classes from this Library
    *
-   * @param data teh serialized string representation of the table
+   * @param data the serialized string representation of the table
    * @return the parsed table
    * @throws IllegalArgumentException if the table is invalid
    * @implNote may not currently allow all possible serialized data

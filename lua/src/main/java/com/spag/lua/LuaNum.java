@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * LuaNum is the representation of lua's number type which can represent both integers and decimals
- * like teh LuaString type this attempts to maintain all observable properties of the number type in
+ * like the LuaString type this attempts to maintain all observable properties of the number type in
  * lua
  *
  * @author MR_Spagetty
@@ -28,7 +28,7 @@ public class LuaNum implements LuaObject, LuaConcatable {
   }
 
   /**
-   * Gets the LuaNum representing teh given value, should it not already exist a new LuaNum
+   * Gets the LuaNum representing the given value, should it not already exist a new LuaNum
    * with the given value will be created
    *
    * @param value the value to obtain the LuaNum of

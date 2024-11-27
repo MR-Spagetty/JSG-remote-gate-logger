@@ -33,7 +33,7 @@ public class LuaString implements LuaObject, LuaConcatable {
   public final String value;
 
   /**
-   * Gets the LuaString representing teh given value, should it not already exist a new LuaString
+   * Gets the LuaString representing the given value, should it not already exist a new LuaString
    * with the given value will be created
    *
    * @param value the value to obtain the LuaString of
