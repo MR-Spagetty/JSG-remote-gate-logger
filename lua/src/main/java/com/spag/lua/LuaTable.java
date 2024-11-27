@@ -16,12 +16,13 @@ import java.util.stream.Stream;
  * Class to represent lua tables and decoded them from a serialized lua table string (as per the
  * Minecraft OpenComputers mod serialization library), some specifics may not yet be implimented
  *
+ * <p><b>NOTE</b>: indexed values index from 1 to preserve behaviour from lua for pairs, ipairs and
+ * because tables may be speciallly formulated to account for this
+ *
  * @author MR_Spagetty
- * @implNote indexed values index from 1 to preserve behaviour from lua for pairs, ipairs and
- *     because tables may be speciallly formulated to account for this
  */
 public class LuaTable implements LuaObject {
-  public static final String braceRegex = "^\\{(.*)\\}$";
+  static final String braceRegex = "^\\{(.*)\\}$";
   public static final Pattern bracePat = Pattern.compile(braceRegex);
   static final String numRegex = "[1-9][0-9]*\\.[0-9]+" + "|0\\.[0-9]+" + "|0|[1-9][0-9]*";
   public static final Pattern numPat = Pattern.compile(numRegex);
@@ -239,9 +240,10 @@ public class LuaTable implements LuaObject {
   }
 
   /**
-   * parses a LuaTable that is serialized according to the Minecraft OpenComputers mod's
-   * Serialization format into a representation of the oringonal LuaTable using the classes from
-   * this Library
+   * parses a LuaTable that is serialized into a string
+   *
+   * <p>deserializes the table from the Minecraft OpenComputers mod's serialization format into a
+   * representation of the oringonal LuaTable using the classes from this Library
    *
    * @param data teh serialized string representation of the table
    * @return the parsed table

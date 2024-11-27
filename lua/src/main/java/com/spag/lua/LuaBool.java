@@ -40,6 +40,11 @@ public enum LuaBool implements LuaObject {
     };
   }
 
+  /**
+   * converts a java boolean to the equivilent LuaBool representation
+   * @param value the java boolean
+   * @return the LuaBool constant equivilent
+   */
   public static LuaBool of(boolean value) {
     return value ? True : False;
   }
