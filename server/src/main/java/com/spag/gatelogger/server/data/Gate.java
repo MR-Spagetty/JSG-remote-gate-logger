@@ -162,4 +162,16 @@ public class Gate {
     }
     return glyphs;
   }
+
+  public static Glyph[] addressOf(GateType type, LuaObject address) {
+    if (address instanceof LuaString serialAddr) {
+      return addressOf(type, serialAddr.value);
+    } else if (address instanceof LuaTable tableAddr) {
+      return addressOf(type, tableAddr);
+    } else {
+      throw new DataFormatException(
+          "Expected LuaString or LuaTable for address data but got \"%s\""
+              .formatted(address.type()));
+    }
+  }
 }

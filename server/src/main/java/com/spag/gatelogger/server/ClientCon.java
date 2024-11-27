@@ -166,7 +166,7 @@ public class ClientCon extends Connection {
                           "dialed",
                           d -> {
                             selected.gate.dialedAddress =
-                                Gate.addressOf(selected.gate.type(), (LuaTable) d.get("address"));
+                                Gate.addressOf(selected.gate.type(), d.get("address"));
                           }));
                   packet.add(LuaString.of("dialed"));
                 }
