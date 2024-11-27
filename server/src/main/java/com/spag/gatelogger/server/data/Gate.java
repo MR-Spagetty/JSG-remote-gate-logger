@@ -158,7 +158,12 @@ public class Gate {
   public static Glyph[] addressOf(GateType type, LuaTable address) {
     Glyph[] glyphs = new Glyph[9];
     for (int i = 0; i < glyphs.length; i++) {
-      glyphs[i] = Glyph.glyphGetters.get(type).apply(((LuaString) address.get(i)).value);
+      if (address.get(i) instanceof LuaString glyphString) {
+        glyphs[i] = Glyph.glyphGetters.get(type).apply(glyphString.value);
+      } else {
+        throw new DataFormatException(
+            "Expected LuaString for glyph name but got: \"%s\"".formatted(address.get(i).type()));
+      }
     }
     return glyphs;
   }
