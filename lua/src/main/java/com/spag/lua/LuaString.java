@@ -33,4 +33,9 @@ public class LuaString implements LuaObject {
   public String toString() {
     return "\"%s\"".formatted(this.value);
   }
+
+  @Override
+  public String type() {
+    return "LuaString";
+  }
 }

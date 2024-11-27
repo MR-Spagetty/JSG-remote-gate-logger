@@ -26,4 +26,9 @@ public class LuaNum implements LuaObject {
         .computeIfAbsent(data, val -> new SoftReference<>(new LuaNum(new BigDecimal(val))))
         .get();
   }
+
+  @Override
+  public String type() {
+    return "LuaNum";
+  }
 }

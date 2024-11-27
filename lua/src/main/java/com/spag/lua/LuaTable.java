@@ -18,7 +18,7 @@ public class LuaTable implements LuaObject {
   public static final Pattern bracePat = Pattern.compile(braceRegex);
   static final String numRegex = "[1-9][0-9]*\\.[0-9]+" + "|0\\.[0-9]+" + "|0|[1-9][0-9]*";
   public static final Pattern numPat = Pattern.compile(numRegex);
-  static final String stringRegex = "\\\".*?[^\\\\]\\\"|\\\"\\\"";
+  static final String stringRegex = "\\\"\\\"|\\\".*?[^\\\\]\\\"";
   public static final Pattern stringPat = Pattern.compile(stringRegex);
   public static final Pattern indexed =
       Pattern.compile(
@@ -173,5 +173,10 @@ public class LuaTable implements LuaObject {
 
   public LuaObject replace(int i, LuaObject newElm) {
     return this.dataByIndex.set(i - 1, newElm);
+  }
+
+  @Override
+  public String type() {
+    return "LuaTable";
   }
 }

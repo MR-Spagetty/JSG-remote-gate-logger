@@ -20,4 +20,9 @@ public enum LuaBool implements LuaObject {
       default -> throw new IllegalArgumentException("Invalid boolean value: " + value);
     };
   }
+
+  @Override
+  public String type() {
+    return "LuaBool";
+  }
 }
