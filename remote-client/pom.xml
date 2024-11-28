@@ -16,6 +16,14 @@
     <maven.compiler.release>23</maven.compiler.release>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>github</id>
+      <name>Github MR-Spagetty Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/MR-Spagetty/*</url>
+    </repository>
+  </repositories>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
