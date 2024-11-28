@@ -27,11 +27,11 @@ jobs:
         java-version: '23'
         distribution: 'temurin'
         cache: maven
-    - name: Test lua lib
-      run: mvn -f lua clean test
-    - name: Install lua lib
-      run: mvn -f lua clean install 
     - name: Build Server with Maven
       run: mvn -f server package
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
     - name: Build Remote Client with Maven
       run: mvn -f remote-client package
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
