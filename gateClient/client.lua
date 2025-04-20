@@ -182,7 +182,7 @@ local function execute(command)
   elseif command[1] == "dial" then
     dial(command.address, command.allowDHD)
   elseif command[1] == "shell" then
-    sendEvent { os.date(), id = sg.address, type = "response", data = { shell.execute(shell.command, nil) } }
+    sendEvent { os.date(), id = sg.address, type = "response", data = { shell.execute(command.command, nil) } }
   else
     print("Unknown command: " .. command[1])
     sendEvent { os.date(), id = sg.address, data = { "error", "Unknown command" } }
