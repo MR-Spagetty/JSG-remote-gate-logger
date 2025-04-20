@@ -32,12 +32,12 @@ local function dial(AddressBuffer, allowDHD)
     end
     AddressBuffer = {}
     for i, v in ipairs(shorterAdr) do table.insert(AddressBuffer, v) end
-
+    table.insert(AddressBuffer, "point of origin")
     for i, glyph in ipairs(AddressBuffer) do
       if allowDHD and component.isAvailable "dhd" then
         component.dhd.pressButton(glyph)
       else
-        sg.engageGlyph(glyph)
+        sg.engageSymbol(glyph)
       end
       if not event.pull("stargate"):match "chevron_engaged$" then
         return
