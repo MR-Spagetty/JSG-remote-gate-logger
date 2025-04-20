@@ -18,7 +18,7 @@ local conf = require "config"
 local eventQueue = {}
 local con
 
-local function dial(AddressBuffer, allowDHD)
+local function dial(AddressBuffer, allowDHD, idc)
   if #AddressBuffer > 6 then
     local shorterAdr = {}
     for i = 1, 6 do table.insert(shorterAdr, AddressBuffer[i]) end
@@ -46,6 +46,9 @@ local function dial(AddressBuffer, allowDHD)
       end
     end
     sg.engageGate()
+    if idc then
+      sg.sendIrisCode(idc)
+    end
   end
 end
 
@@ -180,7 +183,7 @@ local function execute(command)
   elseif command[1] == "close" then
     sg.disengageGate()
   elseif command[1] == "dial" then
-    dial(command.address, command.allowDHD)
+    dial(command.address, command.allowDHD, command.idc)
   elseif command[1] == "shell" then
     sendEvent { os.date(), id = sg.address, type = "response", data = { shell.execute(command.command, nil) } }
   else
