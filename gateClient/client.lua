@@ -186,6 +186,8 @@ local function execute(command)
     dial(command.address, command.allowDHD, command.idc)
   elseif command[1] == "shell" then
     sendEvent { os.date(), id = sg.address, type = "response", data = { shell.execute(command.command, nil) } }
+  elseif command[1] == "iris" then
+    sendEvent { os.date(), id = sg.address, type = "response", data = { sg.toggleIris() } }
   else
     print("Unknown command: " .. command[1])
     sendEvent { os.date(), id = sg.address, data = { "error", "Unknown command" } }
