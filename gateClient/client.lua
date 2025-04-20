@@ -37,12 +37,16 @@ local function dial(AddressBuffer, allowDHD, idc)
     for i, glyph in ipairs(AddressBuffer) do
       if allowDHD and component.isAvailable "dhd" then
         component.dhd.pressButton(glyph)
+        if glyph == "point of origin" then
+          os.sleep(4)
+        end
+        os.sleep(1)
       else
         sg.engageSymbol(glyph)
         event.pull("stargate_spin_start")
-      end
-      if not event.pull("stargate"):match "chevron_engaged$" then
-        return
+        if not event.pull("stargate"):match "chevron_engaged$" then
+          return
+        end
       end
     end
     sg.engageGate()
