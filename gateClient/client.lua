@@ -139,9 +139,6 @@ local function execute(command)
       "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/client.lua?v=1 /home/client.lua -f")
     os.execute(
       "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/.shrc?v=1 /home/.shrc -f")
-    os.execute(
-      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/autorun.lua?v=1 /autorun.lua -f")
-    require("filesystem").setAutorunEnabled(true)
 
     if command.reboot then
       os.execute("reboot")
@@ -185,7 +182,7 @@ local function execute(command)
   elseif command[1] == "dial" then
     dial(command.address, command.allowDHD)
   elseif command[1] == "shell" then
-    sendEvent { os.date(), id = sg.address, type = "response", data = { shell.execute(shell.command) } }
+    sendEvent { os.date(), id = sg.address, type = "response", data = { shell.execute(shell.command, nil) } }
   else
     print("Unknown command: " .. command[1])
     sendEvent { os.date(), id = sg.address, data = { "error", "Unknown command" } }
