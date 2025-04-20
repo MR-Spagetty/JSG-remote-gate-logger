@@ -67,8 +67,8 @@ local function getCon()
     conGot.finishConnect()
     res = conGot.finishConnect()
     attempt = attempt + 1
-    if attempt > 5 then
-      print("Failed to connect to the server after 5 attempts.")
+    if conf.giveUpAfterNTries and attempt >= conf.giveUpAfterNTries then
+      print("Failed to connect to the server after "..attempt.." attempts.")
       os.exit()
     end
   end

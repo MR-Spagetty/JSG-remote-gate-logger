@@ -5,7 +5,7 @@ local data = {
   port = 123456,
   -- the name of this gate
   name = "gateName",
-  -- whether to reboot on failure to connect to server or not
-  rebootOnFailure=true
+  -- how many tries to give up after (set to false or nil to not give up)
+  giveUpAfterNTries=false
 }
 return data
