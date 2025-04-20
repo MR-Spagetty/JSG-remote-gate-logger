@@ -39,7 +39,7 @@ local function dial(AddressBuffer, allowDHD)
       else
         sg.engageGlyph(glyph)
       end
-      if !event.pull("stargate"):match "chevron_engaged$" then
+      if not event.pull("stargate"):match "chevron_engaged$" then
         return
       end
     end
