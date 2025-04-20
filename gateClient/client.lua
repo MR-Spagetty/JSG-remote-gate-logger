@@ -139,7 +139,13 @@ local function execute(command)
       "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/client.lua?v=1 /home/client.lua -f")
     os.execute(
       "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/.shrc?v=1 /home/.shrc -f")
-    os.execute("reboot")
+    os.execute(
+      "wget https://raw.githubusercontent.com/MR-Spagetty/JSG-remote-gate-logger/refs/heads/main/gateClient/autorun.lua?v=1 /autorun.lua -f")
+    require("filesystem").setAutorunEnabled(true)
+
+    if command.reboot then
+      os.execute("reboot")
+    end
   elseif command[1] == "status" then
     con.write(serial.serialize { os.date(), id = sg.address,
       type = "response",
@@ -170,17 +176,16 @@ local function execute(command)
   elseif command[1] == "stop" then
     sendEvent({ os.date(), id = sg.address, type = "bye bye" })
     con.close()
+    if command.reboot then
+      shell.execute("reboot")
+    end
     os.exit()
   elseif command[1] == "close" then
     sg.disEngageGate()
   elseif command[1] == "dial" then
     dial(command.address, command.allowDHD)
   elseif command[1] == "shell" then
-    if type(command.command) == "string" then
-      sendEvent {os.date(), id=sg.address,type="response", data = {shell.execute(shell.command)}}
-    else
-      sendEvent {os.date(), id=sg.address, data={"shellError", "No shell command given"}}
-    end
+    sendEvent { os.date(), id = sg.address, type = "response", data = { shell.execute(shell.command) } }
   else
     print("Unknown command: " .. command[1])
     sendEvent { os.date(), id = sg.address, data = { "error", "Unknown command" } }
