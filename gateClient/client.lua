@@ -178,7 +178,7 @@ local function execute(command)
     end
     os.exit()
   elseif command[1] == "close" then
-    sg.disEngageGate()
+    sg.disengageGate()
   elseif command[1] == "dial" then
     dial(command.address, command.allowDHD)
   elseif command[1] == "shell" then
