@@ -17,6 +17,35 @@ local conf = require "config"
 local eventQueue = {}
 local con
 
+local function dial(AddressBuffer, allowDHD)
+  if #AddressBuffer > 6 then
+    local shorterAdr = {}
+    for i = 1, 6 do table.insert(shorterAdr, AddressBuffer[i]) end
+    for i = 7, 8 do
+      requirement, msg = sg.getEnergyRequiredToDial(table.unpack(shorterAdr))
+      if type(requirement) == "table" then
+        print("SMART DIALING ACTIVE", 1)
+        break
+      else
+        table.insert(shorterAdr, AddressBuffer[i])
+      end
+    end
+    AddressBuffer = {}
+    for i, v in ipairs(shorterAdr) do table.insert(AddressBuffer, v) end
+
+    for i, glyph in ipairs(AddressBuffer) do
+      if allowDHD and component.isAvailable "dhd" then
+        component.dhd.pressButton(glyph)
+      else
+        sg.engageGlyph(glyph)
+      end
+      if !event.pull("stargate"):match "chevron_engaged$" then
+        return
+      end
+    end
+    sg.engageGate()
+  end
+end
 
 local function getCon()
   local conGot;
@@ -40,7 +69,7 @@ local function getCon()
   end
   conGot.write(serial.serialize({
     os.date(),
-    id=sg.address,
+    id = sg.address,
     type = "init",
     data = {
       "init",
@@ -48,8 +77,8 @@ local function getCon()
       status = sg.getGateStatus(),
       gateType = sg.getGateType(),
       dialed = sg.dialedAddress,
-      hasDHD = component.isAvailable "dhd"
-    }
+      hasDHD = component.isAvailable "dhd",
+    },
   }))
   return conGot
 end
@@ -70,21 +99,21 @@ local function processEvent(e)
       os.date(),
       id = sg.address,
       type = "stargate",
-      data = e
+      data = e,
     }
   elseif e[1] == "modem_message" then
     return {
       os.date(),
       id = sg.address,
       type = "modem",
-      data = e
+      data = e,
     }
   else
     return {
       os.date(),
       id = sg.address,
       type = "other",
-      data = e
+      data = e,
     }
   end
 end
@@ -117,29 +146,33 @@ local function execute(command)
         status = sg.getGateStatus(),
         gateType = sg.getGateType(),
         dialed = sg.dialedAddress,
-        hasDHD = component.isAvailable "dhd"
-      }
+        hasDHD = component.isAvailable "dhd",
+      },
     })
   elseif command[1] == "dialed" then
-    con.write (serial.serialize { os.date(), id = sg.address,
-      type="response",
+    con.write(serial.serialize { os.date(), id = sg.address,
+      type = "response",
       data = {
         "dialed",
-        address = sg.dialedAddress
-      }
+        address = sg.dialedAddress,
+      },
     })
   elseif command[1] == "address" then
-    con.write (serial.serialize { os.date(), id = sg.address,
-      type="response",
+    con.write(serial.serialize { os.date(), id = sg.address,
+      type = "response",
       data = {
         "address",
-        address = sg.stargateAddress
-      }
+        address = sg.stargateAddress,
+      },
     })
   elseif command[1] == "stop" then
     sendEvent({ os.date(), id = sg.address, type = "bye bye" })
     con.close()
     os.exit()
+  elseif command[1] == "close" then
+    sg.disEngageGate()
+  elseif command[1] == "dial" then
+    dial(command.address)
   else
     print("Unknown command: " .. command[1])
     sendEvent { os.date(), id = sg.address, data = { "error", "Unknown command" } }
