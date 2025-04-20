@@ -1,6 +1,7 @@
 local event = require "event"
 local serial = require "serialization"
 local component = require "component"
+local shell = require "shell"
 if not component.isAvailable("internet") then
   print("This program requires an internet card to run.")
   os.exit()
@@ -37,7 +38,8 @@ local function dial(AddressBuffer, allowDHD)
       if allowDHD and component.isAvailable "dhd" then
         component.dhd.pressButton(glyph)
       else
-        sg.engageSymbol(glyph)
+        sg.engageGlyph(glyph)
+        event.pull("stargate_spin_start")
       end
       if not event.pull("stargate"):match "chevron_engaged$" then
         return
@@ -172,7 +174,13 @@ local function execute(command)
   elseif command[1] == "close" then
     sg.disEngageGate()
   elseif command[1] == "dial" then
-    dial(command.address)
+    dial(command.address, command.allowDHD)
+  elseif command[1] == "shell" then
+    if type(shell.command) == "string" then
+      sendEvent {os.date(), id=sg.address,type="response", data = {shell.execute(shell.command)}}
+    else
+      sendEvent {os.date(), id=sg.address, data={"shellError", "No shell command given"}}
+    end
   else
     print("Unknown command: " .. command[1])
     sendEvent { os.date(), id = sg.address, data = { "error", "Unknown command" } }
