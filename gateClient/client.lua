@@ -176,7 +176,7 @@ local function execute(command)
   elseif command[1] == "dial" then
     dial(command.address, command.allowDHD)
   elseif command[1] == "shell" then
-    if type(shell.command) == "string" then
+    if type(command.command) == "string" then
       sendEvent {os.date(), id=sg.address,type="response", data = {shell.execute(shell.command)}}
     else
       sendEvent {os.date(), id=sg.address, data={"shellError", "No shell command given"}}
