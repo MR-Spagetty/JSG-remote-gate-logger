@@ -43,7 +43,7 @@ public class GateCon extends Connection {
   @Override
   protected void doPacket(LuaTable packet) {
     String type =
-        Optional.ofNullable(packet.get("type"))
+        Optional.ofNullable(packet.get(LuaString.of("type")))
             .map(t -> (LuaString) t)
             .map(t -> t.value)
             .orElse(null);
@@ -52,7 +52,7 @@ public class GateCon extends Connection {
       case "stargate", "modem", "other" -> this.gate.logData(packet);
       case "response" -> {
         synchronized (monitor) {
-          if (packet.get("data") == LuaObject.nil) {
+          if (packet.get(LuaString.of("data")) == LuaObject.nil) {
             return;
           }
           this.subs.parallelStream()

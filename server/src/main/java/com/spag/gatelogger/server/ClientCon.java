@@ -19,11 +19,11 @@ public class ClientCon extends Connection {
   @Override
   protected void startUp() {
     LuaTable connPacket = LuaTable.fromString(readPacket());
-    System.out.println(connPacket.get("data"));
+    System.out.println(connPacket.get(LuaString.of("data")));
     LuaTable welcome = new LuaTable();
-    welcome.put("type", LuaString.of("welcome"));
+    welcome.put(LuaString.of("type"), LuaString.of("welcome"));
     LuaTable welcomeData = new LuaTable();
-    welcomeData.add(LuaString.of("Hello %s"));
+    welcomeData.insert(LuaString.of("Hello %s"));
   }
 
   @Override
@@ -39,67 +39,67 @@ public class ClientCon extends Connection {
 
   @Override
   protected void doPacket(LuaTable packet) {
-    String type =
-        Optional.of(packet.get("type"))
-            .filter(t -> t != LuaObject.nil)
-            .map(t -> (LuaString) t)
-            .map(t -> t.value)
-            .orElse("none");
+    String type = Optional.of(packet.get(LuaString.of("type")))
+        .filter(t -> t != LuaObject.nil)
+        .map(t -> (LuaString) t)
+        .map(t -> t.value)
+        .orElse("none");
     switch (type) {
       case "request" -> handleRequest(packet);
-      case "response" -> {}
-      default -> {}
+      case "response" -> {
+      }
+      default -> {
+      }
     }
   }
 
   private void handleRequest(LuaTable requestPacket) {
     LuaTable responsePacket = new LuaTable();
-    responsePacket.put("to", requestPacket);
-    List<String> command =
-        Optional.of(requestPacket.get("data"))
-            .filter(p -> p != LuaObject.nil)
-            .map(c -> (LuaTable) c)
-            .orElseThrow(() -> new DataFormatException("request data not found"))
-            .stream()
-            .map(p -> p instanceof LuaString ? ((LuaString) p).value : p.toString())
-            .toList();
+    responsePacket.put(LuaString.of("to"), requestPacket);
+    List<String> command = Optional.of(requestPacket.get(LuaString.of("data")))
+        .filter(p -> p != LuaObject.nil)
+        .map(c -> (LuaTable) c)
+        .orElseThrow(() -> new DataFormatException("request data not found"))
+        .stream()
+        .map(p -> p instanceof LuaString ? ((LuaString) p).value : p.toString())
+        .toList();
     if (command.isEmpty()) {
-      responsePacket.put("data", invalidCommand("No request given"));
+      responsePacket.put(LuaString.of("data"), invalidCommand("No request given"));
     } else {
       responsePacket.put(
-          "data",
+          LuaString.of("data"),
           switch (command.get(0)) {
             case "list" ->
-                GateCon.gateConns.stream()
-                    .map(c -> c.gate)
-                    .reduce(
-                        new LuaTable(),
-                        (t, g) -> {
-                          t.put(g.id, LuaString.of(g.name()));
-                          return t;
-                        },
-                        (a, b) -> a.merge(b));
+              GateCon.gateConns.stream()
+                  .map(c -> c.gate)
+                  .reduce(
+                      new LuaTable(),
+                      (t, g) -> {
+                        t.put(LuaString.of(g.id), LuaString.of(g.name()));
+                        return t;
+                      },
+                      (a, b) -> a.merge(b));
             default ->
-                gateRequest(
-                    command.get(0),
-                    command.subList(1, command.size()).stream().toArray(String[]::new));
+              gateRequest(
+                  command.get(0),
+                  command.subList(1, command.size()).stream().toArray(String[]::new));
           });
     }
-    responsePacket.add(LuaString.of("" + System.currentTimeMillis() / 1000));
+    responsePacket.insert(LuaString.of("" + System.currentTimeMillis() / 1000));
     sendPacket(responsePacket);
   }
 
-  private static final UnsupportedOperationException COMMAND_ROOT_ERROR =
-      new UnsupportedOperationException("invalid command");
+  private static final UnsupportedOperationException COMMAND_ROOT_ERROR = new UnsupportedOperationException(
+      "invalid command");
 
   private LuaTable invalidCommand(String reason, String... extra) {
     LuaTable out = new LuaTable();
-    out.add(LuaString.of("invalid command"));
-    out.put("reason", LuaString.of(reason));
+    out.insert(LuaString.of("invalid command"));
+    out.put(LuaString.of("reason"), LuaString.of(reason));
     if (extra.length > 0) {
       LuaTable extraData = new LuaTable();
-      Stream.of(extra).forEach(d -> extraData.add(LuaString.of(d)));
-      out.put("info", extraData);
+      Stream.of(extra).forEach(d -> extraData.insert(LuaString.of(d)));
+      out.put(LuaString.of("info"), extraData);
     }
     return out;
   }
@@ -110,32 +110,30 @@ public class ClientCon extends Connection {
       if (params.length < 1) {
         throw new UnsupportedOperationException("No gate specified", COMMAND_ROOT_ERROR);
       }
-      GateCon selected =
-          GateCon.gateConns.stream()
-              .filter(g -> g.gate.id.substring(0, params[0].length()).equals(params[0]))
-              .reduce(
-                  (a, b) -> {
-                    throw new UnsupportedOperationException(
-                        """
+      GateCon selected = GateCon.gateConns.stream()
+          .filter(g -> g.gate.id.substring(0, params[0].length()).equals(params[0]))
+          .reduce(
+              (a, b) -> {
+                throw new UnsupportedOperationException(
+                    """
                         Shortened id \"%s\" is ambiguous between at least:
                           \"%s\" (%s)
                           \"%s\" (%s)"""
-                            .formatted(
-                                params[0], a.gate.id, a.gate.name(), b.gate.id, b.gate.name()),
-                        COMMAND_ROOT_ERROR);
-                  })
-              .orElseThrow(
-                  () ->
-                      new UnsupportedOperationException(
-                          "No gate found with id matching \"%s\"".formatted(params[0]),
-                          COMMAND_ROOT_ERROR));
+                        .formatted(
+                            params[0], a.gate.id, a.gate.name(), b.gate.id, b.gate.name()),
+                    COMMAND_ROOT_ERROR);
+              })
+          .orElseThrow(
+              () -> new UnsupportedOperationException(
+                  "No gate found with id matching \"%s\"".formatted(params[0]),
+                  COMMAND_ROOT_ERROR));
 
       int nParams = params.length - 1;
       assert nParams >= 0;
       switch (command) {
         case "update" -> {
           LuaTable packet = new LuaTable();
-          packet.add(LuaString.of("update"));
+          packet.insert(LuaString.of("update"));
           selected.sendPacket(packet);
         }
         case "info" -> {
@@ -146,9 +144,9 @@ public class ClientCon extends Connection {
                   new GateResponseSubscriber(
                       "status",
                       d -> {
-                        out.merge((LuaTable) d.get("data"));
+                        out.merge((LuaTable) d.get(LuaString.of("data")));
                       }));
-              packet.add(LuaString.of("status"));
+              packet.insert(LuaString.of("status"));
             } else if (nParams == 1) {
               switch (params[1]) {
                 case "address" -> {
@@ -156,19 +154,19 @@ public class ClientCon extends Connection {
                       new GateResponseSubscriber(
                           "address",
                           d -> {
-                            selected.gate.updateAddresses((LuaTable) d.get("address"));
+                            selected.gate.updateAddresses((LuaTable) d.get(LuaString.of("address")));
                           }));
-                  packet.add(LuaString.of("address"));
+                  packet.insert(LuaString.of("address"));
                 }
                 case "dialed" -> {
                   selected.subscribe(
                       new GateResponseSubscriber(
                           "dialed",
                           d -> {
-                            selected.gate.dialedAddress =
-                                Gate.addressOf(selected.gate.type(), d.get("address"));
+                            selected.gate.dialedAddress = Gate.addressOf(selected.gate.type(),
+                                d.get(LuaString.of("address")));
                           }));
-                  packet.add(LuaString.of("dialed"));
+                  packet.insert(LuaString.of("dialed"));
                 }
                 default -> {
                   return invalidCommand(
@@ -185,9 +183,10 @@ public class ClientCon extends Connection {
             selected.monitor.wait();
           }
           System.out.println("Resposne recieved");
-          out.replace(1, LuaString.of(""));
+          out.put(LuaNum.of(1), LuaString.of(""));
         }
-        case "close" -> {}
+        case "close" -> {
+        }
         default -> invalidCommand("Unknown request \"%s\"".formatted(command));
       }
 
@@ -199,7 +198,7 @@ public class ClientCon extends Connection {
       throw e;
     } catch (InterruptedException e) {
       LuaTable out = new LuaTable();
-      out.add(LuaString.of("response await interrupted"));
+      out.insert(LuaString.of("response await interrupted"));
       return out;
     }
   }

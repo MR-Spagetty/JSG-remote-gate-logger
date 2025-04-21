@@ -8,7 +8,7 @@ public record GateResponseSubscriber(Predicate<LuaTable> classifier, Consumer<Lu
     implements PacketSubscriber {
 
   public GateResponseSubscriber(String type, Consumer<LuaTable> handler) {
-    this(p -> ((LuaString) ((LuaTable) p.get("data")).get(1)).value.equals(type), handler);
+    this(p -> ((LuaString) ((LuaTable) p.get(LuaString.of("data"))).get(LuaNum.of(1))).value.equals(type), handler);
   }
 
   @Override

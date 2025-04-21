@@ -35,7 +35,7 @@ public class Gate {
 
   private Gate(String id, LuaTable data) {
     this(id);
-    Optional<LuaObject> name = Optional.of(data.get("name")).filter(elm -> elm == LuaObject.nil);
+    Optional<LuaObject> name = Optional.of(data.get(LuaString.of("name"))).filter(elm -> elm == LuaObject.nil);
     if (name.isPresent()) {
       LuaObject nameO = name.get();
       if (nameO instanceof LuaString nameString) {
@@ -45,7 +45,7 @@ public class Gate {
             "Expected a LuaString for name but got: \"%s\"".formatted(nameO.type()));
       }
     }
-    Optional<LuaObject> type = Optional.of(data.get("name")).filter(elm -> elm == LuaObject.nil);
+    Optional<LuaObject> type = Optional.of(data.get(LuaString.of("name"))).filter(elm -> elm == LuaObject.nil);
     if (type.isPresent()) {
       LuaObject typeO = type.get();
       if (typeO instanceof LuaString typeString) {
@@ -62,11 +62,10 @@ public class Gate {
   }
 
   public void logData(LuaTable data) {
-    String type =
-        Optional.ofNullable(data.get("type"))
-            .map(t -> (LuaString) t)
-            .map(t -> t.value)
-            .orElseThrow(() -> new DataFormatException("no packet type given"));
+    String type = Optional.ofNullable(data.get(LuaString.of("type")))
+        .map(t -> (LuaString) t)
+        .map(t -> t.value)
+        .orElseThrow(() -> new DataFormatException("no packet type given"));
     switch (type) {
       case "stargate" -> this.gateData.add(data);
       case "modem" -> this.modemData.add(data);
@@ -95,8 +94,8 @@ public class Gate {
         .forEach(
             ae -> {
               LuaTable addr = new LuaTable();
-              Stream.of(ae.getValue()).map(g -> LuaString.of(g.name())).forEach(addr::add);
-              addreses.put(ae.getKey().toString(), addr);
+              Stream.of(ae.getValue()).map(g -> LuaString.of(g.name())).forEach(addr::insert);
+              addreses.put(LuaString.of(ae.getKey().toString()), addr);
             });
     return addreses;
   }
@@ -104,8 +103,11 @@ public class Gate {
   public void updateAddresses(LuaTable addreses) {
     addreses.pairs(
         (t, addr) -> {
-          GateType type = GateType.valueOf(t);
-          this.gateAddresses.put(type, addressOf(type, (LuaTable) addr));
+          if (t instanceof LuaString tLuaString) {
+            GateType type = GateType.valueOf(tLuaString.value);
+            this.gateAddresses.put(type, addressOf(type, (LuaTable) addr));
+          } else
+            throw new IllegalArgumentException();
         });
   }
 
@@ -113,38 +115,39 @@ public class Gate {
     return this.hasDHD;
   }
 
-  /*example init packet:
-  {"03/02/70 04:28:08",id="1eb0a1e1-9a12-41e9-a297-76bd6485d70d",type="init",data={"init",hasDHD=false,dialed="[]",status="idle",gateType="MILKYWAY",name="Chulak"}} */
+  /*
+   * example init packet:
+   * {"03/02/70 04:28:08",id="1eb0a1e1-9a12-41e9-a297-76bd6485d70d",type="init",
+   * data={"init",hasDHD=false,dialed="[]",status="idle",gateType="MILKYWAY",name=
+   * "Chulak"}}
+   */
   public static Gate of(LuaTable init) {
-    LuaObject id = init.get("id");
+    LuaObject id = init.get(LuaString.of("id"));
     if (!(id instanceof LuaString)) {
       throw new DataFormatException(
           "Expected LuaString for id, got: \"%s\" in:\n%s".formatted(id.type(), init));
     }
     Gate gate;
-    LuaObject data = init.get("data");
+    LuaObject data = init.get(LuaString.of("data"));
     if (data != LuaObject.nil) {
       if (!(data instanceof LuaTable)) {
         throw new DataFormatException(
             "Expected LuaTable or nil for data but got \"%s\"".formatted(data.type()));
       }
-      gate =
-          cache.computeIfAbsent(((LuaString) id).value, newID -> new Gate(newID, (LuaTable) data));
-      gate.hasDHD = ((LuaBool) (((LuaTable) init.get("data")).get("hasDHD"))).get();
+      gate = cache.computeIfAbsent(((LuaString) id).value, newID -> new Gate(newID, (LuaTable) data));
+      gate.hasDHD = ((LuaBool) (((LuaTable) init.get(LuaString.of("data"))).get(LuaString.of("hasDHD")))).get();
     } else {
-      gate =
-          Optional.ofNullable(cache.get(((LuaString) id).value))
-              .orElseThrow(() -> new IllegalArgumentException("Unknown gate: %s".formatted(id)));
+      gate = Optional.ofNullable(cache.get(((LuaString) id).value))
+          .orElseThrow(() -> new IllegalArgumentException("Unknown gate: %s".formatted(id)));
     }
     return gate;
   }
 
   public static Glyph[] addressOf(GateType type, String serialAddress) {
     Glyph[] glyphs = new Glyph[9];
-    final Pattern serialAddr =
-        Pattern.compile(
-            "^\\[(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+),"
-                + " )?(?:([^,]+), )?(?:([^,]+), )?(.*?)]$");
+    final Pattern serialAddr = Pattern.compile(
+        "^\\[(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+), )?(?:([^,]+),"
+            + " )?(?:([^,]+), )?(?:([^,]+), )?(.*?)]$");
     MatchResult mr = serialAddr.matcher(serialAddress).toMatchResult();
     if (!mr.hasMatch()) {
       throw new IllegalArgumentException("Invalid serialized address: " + serialAddress);
@@ -158,11 +161,11 @@ public class Gate {
   public static Glyph[] addressOf(GateType type, LuaTable address) {
     Glyph[] glyphs = new Glyph[9];
     for (int i = 0; i < glyphs.length; i++) {
-      if (address.get(i) instanceof LuaString glyphString) {
+      if (address.get(LuaNum.of(i)) instanceof LuaString glyphString) {
         glyphs[i] = Glyph.glyphGetters.get(type).apply(glyphString.value);
       } else {
         throw new DataFormatException(
-            "Expected LuaString for glyph name but got: \"%s\"".formatted(address.get(i).type()));
+            "Expected LuaString for glyph name but got: \"%s\"".formatted(address.get(LuaNum.of(i)).type()));
       }
     }
     return glyphs;
