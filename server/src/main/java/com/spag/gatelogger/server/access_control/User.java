@@ -30,10 +30,11 @@ public class User {
   private User(File userFile, LuaObject passHash) throws IllegalAccessException {
     try {
       LuaTable userData = LuaTable.fromString(Files.readString(usersPath));
-      if (LuaOptional.ofNilable(userData.get(LuaString.of("password"))).map(pass -> pass == passHash).orElse(true)) {
+      Optional<LuaObject> expectedPassword = LuaOptional.ofNilable(userData.get(LuaString.of("password")));
+      if (expectedPassword.map(pass -> pass == passHash).orElse(true)) {
         this.perms = (LuaTable) LuaOptional.ofNilable(userData.get(LuaString.of("perms")))
             .orElse(new LuaTable());
-        this.passwordHash = LuaOptional.ofNilable(passHash).map(p -> ((LuaString) p).value);
+        this.passwordHash = expectedPassword.map(p -> ((LuaString) p).value);
       } else {
         throw new IllegalAccessException("Password does not match");
       }

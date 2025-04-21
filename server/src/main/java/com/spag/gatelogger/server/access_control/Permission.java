@@ -14,9 +14,10 @@ public class Permission {
   public static int ADDRESS_VIEW = 2;
   public static int DIAL = 4;
   public static int DHD = 8;
-  public static int IDC_VIEW = 16;
-  public static int IRIS_CONTROL = 32;
-  public static int SHELL = 64;
+  public static int IRIS_VIEW = 16;
+  public static int IDC_VIEW = 32;
+  public static int IRIS_CONTROL = 64;
+  public static int SHELL = 128;
   public static int MAX = CAN_VIEW | ADDRESS_VIEW | DIAL | DHD | IDC_VIEW | IRIS_CONTROL | SHELL;
   public static int PASSWORD_REQUIRED = SHELL | IRIS_CONTROL | IDC_VIEW;
 

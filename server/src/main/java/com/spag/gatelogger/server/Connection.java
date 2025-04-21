@@ -53,13 +53,15 @@ public abstract class Connection extends Thread {
       return;
     }
     startUp();
-    while (socket.isConnected()) {
+    while (socket.isConnected() && !socket.isClosed()) {
       try {
         doPacket(readPacket());
       } catch (NoSuchElementException e) {
       }
     }
 
-    shutDown();
+    if (!socket.isClosed()) {
+      shutDown();
+    }
   }
 }
