@@ -3,11 +3,13 @@ package com.spag.gatelogger.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
 
 /** Hello world! */
 public class App {
   static int clientPort = 3002;
   static int gatePort = 3001;
+  public static final Path dataPath = Path.of("");
 
   public static void main(String[] args) {
     Thread clientCons = new Thread(App::listenForClient);
